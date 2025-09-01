@@ -1,0 +1,54 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\game1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\game1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\content\\content.mgcb||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\content\\content.mgcb||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Content.mgcb",
+              "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Content\\Content.mgcb",
+              "RelativeDocumentMoniker": "gameTest2\\Content\\Content.mgcb",
+              "ToolTip": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Content\\Content.mgcb",
+              "RelativeToolTip": "gameTest2\\Content\\Content.mgcb",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-09-01T10:17:45.298Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Game1.cs",
+              "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Game1.cs",
+              "RelativeDocumentMoniker": "gameTest2\\Game1.cs",
+              "ToolTip": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Game1.cs*",
+              "RelativeToolTip": "gameTest2\\Game1.cs*",
+              "ViewState": "AgIAAC4AAAAAAAAAAAAlwDcAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-26T13:43:07.545Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

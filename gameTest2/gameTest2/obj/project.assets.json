@@ -112,6 +112,22 @@
           }
         }
       },
+      "SixLabors.ImageSharp/3.1.11": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/SixLabors.ImageSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/SixLabors.ImageSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "build/SixLabors.ImageSharp.props": {}
+        }
+      },
       "System.Memory/4.5.3": {
         "type": "package",
         "compile": {
@@ -275,6 +291,22 @@
         "nvorbis.nuspec"
       ]
     },
+    "SixLabors.ImageSharp/3.1.11": {
+      "sha512": "JfPLyigLthuE50yi6tMt7Amrenr/fA31t2CvJyhy/kQmfulIBAqo5T/YFUSRHtuYPXRSaUHygFeh6Qd933EoSw==",
+      "type": "package",
+      "path": "sixlabors.imagesharp/3.1.11",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "build/SixLabors.ImageSharp.props",
+        "lib/net6.0/SixLabors.ImageSharp.dll",
+        "lib/net6.0/SixLabors.ImageSharp.xml",
+        "sixlabors.imagesharp.128.png",
+        "sixlabors.imagesharp.3.1.11.nupkg.sha512",
+        "sixlabors.imagesharp.nuspec"
+      ]
+    },
     "System.Memory/4.5.3": {
       "sha512": "3oDzvc/zzetpTKWMShs1AADwZjQ/36HnsufHRPcOjyRAAMLDlu2iD33MBI2opxnezcVUtXyqDXXjoFMOU9c7SA==",
       "type": "package",
@@ -345,27 +377,28 @@
     "net8.0": [
       "MGCB.Windows >= 3.5.1.1",
       "MonoGame.Content.Builder.Task >= 3.8.*",
-      "MonoGame.Framework.DesktopGL >= 3.8.*"
+      "MonoGame.Framework.DesktopGL >= 3.8.*",
+      "SixLabors.ImageSharp >= 3.1.11"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\pw10thu\\.nuget\\packages\\": {},
+    "C:\\Users\\pd52nbo\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\gameTest2.csproj",
+      "projectUniqueName": "C:\\Users\\pd52nbo\\Documents\\projet_dev\\gameTest2\\gameTest2\\gameTest2.csproj",
       "projectName": "gameTest2",
-      "projectPath": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\gameTest2.csproj",
-      "packagesPath": "C:\\Users\\pw10thu\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\obj\\",
+      "projectPath": "C:\\Users\\pd52nbo\\Documents\\projet_dev\\gameTest2\\gameTest2\\gameTest2.csproj",
+      "packagesPath": "C:\\Users\\pd52nbo\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\pd52nbo\\Documents\\projet_dev\\gameTest2\\gameTest2\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\pw10thu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\pd52nbo\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -409,6 +442,10 @@
           "MonoGame.Framework.DesktopGL": {
             "target": "Package",
             "version": "[3.8.*, )"
+          },
+          "SixLabors.ImageSharp": {
+            "target": "Package",
+            "version": "[3.1.11, )"
           }
         },
         "imports": [

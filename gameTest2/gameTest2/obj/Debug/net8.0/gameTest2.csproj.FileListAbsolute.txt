@@ -116,3 +116,5 @@ C:\Users\pd52nbo\Documents\projet_dev\gameTest2\gameTest2\bin\Debug\net8.0\Conte
 C:\Users\pd52nbo\Documents\projet_dev\gameTest2\gameTest2\bin\Debug\net8.0\Content\textures\background\frame30.xnb
 C:\Users\pd52nbo\Documents\projet_dev\gameTest2\gameTest2\bin\Debug\net8.0\Content\textures\background\frame31.xnb
 C:\Users\pd52nbo\Documents\projet_dev\gameTest2\gameTest2\bin\Debug\net8.0\Content\textures\background\frame32.xnb
+C:\Users\pd52nbo\Documents\projet_dev\gameTest2\gameTest2\bin\Debug\net8.0\Content\textures\asteroide\asteroide1.xnb
+C:\Users\pd52nbo\Documents\projet_dev\gameTest2\gameTest2\bin\Debug\net8.0\Content\textures\asteroide\asteroide2.xnb

@@ -622,3 +622,15 @@
 /processorParam:Style=Regular
 /processorParam:CharacterRegions=32-126
 /build:fonts/score.spritefont
+
+#begin textures/asteroids/asteroid1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/build:textures/asteroide/asteroide1.png
+/build:textures/asteroide/asteroide2.png

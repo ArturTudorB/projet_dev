@@ -86,19 +86,42 @@ namespace gameTest2
 
         // Input
         private MouseState _previousMouseState;
+        private KeyboardState _previousKeyboardState;
 
         // UI / Menu
-        private enum GameState { MainMenu, Playing }
+        private enum GameState { MainMenu, UsernameInput, Playing, GameOver, Leaderboard }
         private GameState _state = GameState.MainMenu;
         private Texture2D _uiPixel;
 
+        // Username input
+        private string _playerName = "";
+        private bool _showCursor = true;
+        private float _cursorBlinkTimer = 0f;
+        private const float CursorBlinkInterval = 0.5f;
+        private const int MaxUsernameLength = 15;
+
+        // Database
+        private ScoreDatabase _scoreDatabase;
+
+        // Leaderboard
+        private List<ScoreEntry> _topScores = new();
+
         public Game1()
         {
-            _graphics = new GraphicsDeviceManager(this)
-            {
-                PreferredBackBufferWidth = 1000,
-                PreferredBackBufferHeight = 900
-            };
+            _graphics = new GraphicsDeviceManager(this);
+            
+            // Set fullscreen mode
+            _graphics.IsFullScreen = true;
+            
+            // Optional: Set preferred resolution for fullscreen (uses desktop resolution by default)
+            // _graphics.PreferredBackBufferWidth = 1920;
+            // _graphics.PreferredBackBufferHeight = 1080;
+            
+            // If you want to use desktop resolution, get it from GraphicsAdapter
+            var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+            _graphics.PreferredBackBufferWidth = displayMode.Width;
+            _graphics.PreferredBackBufferHeight = displayMode.Height;
+            
             _graphics.ApplyChanges();
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -111,7 +134,17 @@ namespace gameTest2
                 _graphics.PreferredBackBufferHeight / 2f);
 
             _previousMouseState = Mouse.GetState();
+            _previousKeyboardState = Keyboard.GetState();
+            
+            _scoreDatabase = new ScoreDatabase();
+            LoadTopScores();
+            
             base.Initialize();
+        }
+
+        private void LoadTopScores()
+        {
+            _topScores = _scoreDatabase.GetTopScores(10);
         }
 
         protected override void LoadContent()
@@ -218,75 +251,42 @@ namespace gameTest2
             }
         }
 
+        private void ToggleFullscreen()
+        {
+            _graphics.IsFullScreen = !_graphics.IsFullScreen;
+            
+            if (_graphics.IsFullScreen)
+            {
+                // Switch to fullscreen - use desktop resolution
+                var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+                _graphics.PreferredBackBufferWidth = displayMode.Width;
+                _graphics.PreferredBackBufferHeight = displayMode.Height;
+            }
+            else
+            {
+                // Switch to windowed mode - use smaller resolution
+                _graphics.PreferredBackBufferWidth = 1000;
+                _graphics.PreferredBackBufferHeight = 900;
+            }
+            
+            _graphics.ApplyChanges();
+        }
+
         protected override void Update(GameTime gameTime)
         {
             var mouse = Mouse.GetState();
             var keyboard = Keyboard.GetState();
-
-            // Quitter via Échap depuis n'importe quel écran du menu
-            if (_state == GameState.MainMenu)
-            {
-                // Background anim continue
-                float dtMenu = (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (_bgFrames.Count > 1)
-                {
-                    _bgFrameTimer += dtMenu;
-                    while (_bgFrameTimer >= BgFrameDuration)
-                    {
-                        _bgFrameTimer -= BgFrameDuration;
-                        _bgFrameIndex = (_bgFrameIndex + 1) % _bgFrames.Count;
-                    }
-                }
-
-                if (keyboard.IsKeyDown(Keys.Escape) ||
-                    GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                {
-                    Exit();
-                }
-
-                // Layout et interactions
-                GetMenuLayout(out var startRect, out var quitRect);
-                bool click = mouse.LeftButton == ButtonState.Pressed &&
-                             _previousMouseState.LeftButton == ButtonState.Released;
-
-                if (keyboard.IsKeyDown(Keys.Enter) || keyboard.IsKeyDown(Keys.Space) ||
-                    (click && startRect.Contains(mouse.Position)))
-                {
-                    _state = GameState.Playing;
-                    ResetGame();
-                }
-                else if (click && quitRect.Contains(mouse.Position))
-                {
-                    Exit();
-                }
-
-                _previousMouseState = mouse;
-                base.Update(gameTime);
-                return;
-            }
-
-            // Ici: état Playing
-            // Retour au menu depuis l'écran Game Over
-            if (_isPlayerDead)
-            {
-                if (keyboard.IsKeyDown(Keys.Enter) || keyboard.IsKeyDown(Keys.Space) ||
-                    (mouse.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released))
-                {
-                    _state = GameState.MainMenu;
-                }
-                _previousMouseState = mouse;
-                base.Update(gameTime);
-                return;
-            }
-
-            if (keyboard.IsKeyDown(Keys.Escape) ||
-                GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                Exit();
-
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            _spawnedEnemyThisUpdate = false;
 
-            // Background anim
+            // Global fullscreen toggle (Alt+Enter or F11)
+            if ((keyboard.IsKeyDown(Keys.LeftAlt) && keyboard.IsKeyDown(Keys.Enter) && 
+                 !(_previousKeyboardState.IsKeyDown(Keys.LeftAlt) && _previousKeyboardState.IsKeyDown(Keys.Enter))) ||
+                (keyboard.IsKeyDown(Keys.F11) && !_previousKeyboardState.IsKeyDown(Keys.F11)))
+            {
+                ToggleFullscreen();
+            }
+
+            // Background animation for all states
             if (_bgFrames.Count > 1)
             {
                 _bgFrameTimer += dt;
@@ -296,6 +296,150 @@ namespace gameTest2
                     _bgFrameIndex = (_bgFrameIndex + 1) % _bgFrames.Count;
                 }
             }
+
+            switch (_state)
+            {
+                case GameState.MainMenu:
+                    UpdateMainMenu(keyboard, mouse);
+                    break;
+                case GameState.UsernameInput:
+                    UpdateUsernameInput(keyboard, mouse, dt);
+                    break;
+                case GameState.Playing:
+                    UpdatePlaying(keyboard, mouse, dt);
+                    break;
+                case GameState.GameOver:
+                    UpdateGameOver(keyboard, mouse);
+                    break;
+                case GameState.Leaderboard:
+                    UpdateLeaderboard(keyboard, mouse);
+                    break;
+            }
+
+            _previousMouseState = mouse;
+            _previousKeyboardState = keyboard;
+            base.Update(gameTime);
+        }
+
+        private void UpdateMainMenu(KeyboardState keyboard, MouseState mouse)
+        {
+            if (keyboard.IsKeyDown(Keys.Escape) ||
+                GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            {
+                Exit();
+            }
+
+            GetMenuLayout(out var startRect, out var leaderboardRect, out var quitRect);
+            bool click = mouse.LeftButton == ButtonState.Pressed &&
+                         _previousMouseState.LeftButton == ButtonState.Released;
+
+            if (keyboard.IsKeyDown(Keys.Enter) || keyboard.IsKeyDown(Keys.Space) ||
+                (click && startRect.Contains(mouse.Position)))
+            {
+                _state = GameState.UsernameInput;
+                _playerName = "";
+            }
+            else if (click && leaderboardRect.Contains(mouse.Position) ||
+                     (keyboard.IsKeyDown(Keys.L) && !_previousKeyboardState.IsKeyDown(Keys.L)))
+            {
+                LoadTopScores();
+                _state = GameState.Leaderboard;
+            }
+            else if (click && quitRect.Contains(mouse.Position))
+            {
+                Exit();
+            }
+        }
+
+        private void UpdateUsernameInput(KeyboardState keyboard, MouseState mouse, float dt)
+        {
+            // Cursor blinking
+            _cursorBlinkTimer += dt;
+            if (_cursorBlinkTimer >= CursorBlinkInterval)
+            {
+                _cursorBlinkTimer -= CursorBlinkInterval;
+                _showCursor = !_showCursor;
+            }
+
+            // Handle text input
+            var pressedKeys = keyboard.GetPressedKeys();
+            foreach (var key in pressedKeys)
+            {
+                if (!_previousKeyboardState.IsKeyDown(key))
+                {
+                    HandleTextInput(key);
+                }
+            }
+
+            // Start game when Enter is pressed (if username is not empty)
+            if (keyboard.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter))
+            {
+                if (!string.IsNullOrWhiteSpace(_playerName))
+                {
+                    _state = GameState.Playing;
+                    ResetGame();
+                }
+            }
+
+            // Back to main menu
+            if (keyboard.IsKeyDown(Keys.Escape) && !_previousKeyboardState.IsKeyDown(Keys.Escape))
+            {
+                _state = GameState.MainMenu;
+            }
+        }
+
+        private void UpdateLeaderboard(KeyboardState keyboard, MouseState mouse)
+        {
+            if (keyboard.IsKeyDown(Keys.Escape) && !_previousKeyboardState.IsKeyDown(Keys.Escape) ||
+                keyboard.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter) ||
+                keyboard.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space) ||
+                (mouse.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released))
+            {
+                _state = GameState.MainMenu;
+            }
+        }
+
+        private void HandleTextInput(Keys key)
+        {
+            if (_playerName.Length >= MaxUsernameLength) return;
+
+            // Handle letters
+            if (key >= Keys.A && key <= Keys.Z)
+            {
+                char letter = (char)('a' + (key - Keys.A));
+                _playerName += letter;
+            }
+            // Handle numbers
+            else if (key >= Keys.D0 && key <= Keys.D9)
+            {
+                char number = (char)('0' + (key - Keys.D0));
+                _playerName += number;
+            }
+            // Handle space
+            else if (key == Keys.Space && _playerName.Length > 0 && !_playerName.EndsWith(" "))
+            {
+                _playerName += " ";
+            }
+            // Handle backspace
+            else if (key == Keys.Back && _playerName.Length > 0)
+            {
+                _playerName = _playerName[..^1];
+            }
+        }
+
+        private void UpdatePlaying(KeyboardState keyboard, MouseState mouse, float dt)
+        {
+            if (_isPlayerDead)
+            {
+                _state = GameState.GameOver;
+                return;
+            }
+
+            if (keyboard.IsKeyDown(Keys.Escape) ||
+                GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+                Exit();
+
+            _spawnedEnemyThisUpdate = false;
 
             // Score et temps de jeu
             _totalPlayTime += dt;
@@ -316,6 +460,10 @@ namespace gameTest2
                 _facing = Vector2.Normalize(mv);
             }
             _playerPosition += mv;
+
+            // Keep player within screen bounds
+            _playerPosition.X = MathHelper.Clamp(_playerPosition.X, _playerTexture.Width / 2f, _graphics.PreferredBackBufferWidth - _playerTexture.Width / 2f);
+            _playerPosition.Y = MathHelper.Clamp(_playerPosition.Y, _playerTexture.Height / 2f, _graphics.PreferredBackBufferHeight - _playerTexture.Height / 2f);
 
             // Shooting
             if (mouse.LeftButton == ButtonState.Pressed &&
@@ -351,9 +499,16 @@ namespace gameTest2
             UpdateEnemies(dt);
             UpdateAsteroids(dt);
             UpdateLasers(dt);
+        }
 
-            _previousMouseState = mouse;
-            base.Update(gameTime);
+        private void UpdateGameOver(KeyboardState keyboard, MouseState mouse)
+        {
+            if (keyboard.IsKeyDown(Keys.Enter) || keyboard.IsKeyDown(Keys.Space) ||
+                (mouse.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released))
+            {
+                LoadTopScores(); // Refresh leaderboard after game over
+                _state = GameState.MainMenu;
+            }
         }
 
         protected override void Draw(GameTime gameTime)
@@ -372,55 +527,208 @@ namespace gameTest2
                 _spriteBatch.Draw(_bgFallback, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), XnaColor.Black);
             }
 
-            if (_state == GameState.MainMenu)
+            switch (_state)
             {
-                // Assombrir le fond
-                var overlay = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-                _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 160));
-
-                // Boutons
-                GetMenuLayout(out var startRect, out var quitRect);
-                var mouse = Mouse.GetState();
-                bool hoverStart = startRect.Contains(mouse.Position);
-                bool hoverQuit = quitRect.Contains(mouse.Position);
-
-                var startColor = hoverStart ? XnaColor.Lerp(XnaColor.DodgerBlue, XnaColor.White, 0.25f) : XnaColor.DodgerBlue;
-                var quitColor = hoverQuit ? XnaColor.Lerp(XnaColor.DimGray, XnaColor.White, 0.25f) : XnaColor.DimGray;
-
-                _spriteBatch.Draw(_uiPixel, startRect, startColor);
-                _spriteBatch.Draw(_uiPixel, quitRect, quitColor);
-
-                // Titres et libellés
-                if (_scoreFont != null)
-                {
-                    string title = "Menu Principal";
-                    var tSize = _scoreFont.MeasureString(title);
-                    var tPos = new Vector2((_graphics.PreferredBackBufferWidth - tSize.X) / 2f, _graphics.PreferredBackBufferHeight * 0.18f);
-                    _spriteBatch.DrawString(_scoreFont, title, tPos, XnaColor.White);
-
-                    string startText = "Démarrer";
-                    string quitText = "Quitter";
-
-                    var sSize = _scoreFont.MeasureString(startText);
-                    var qSize = _scoreFont.MeasureString(quitText);
-
-                    var sPos = new Vector2(startRect.X + (startRect.Width - sSize.X) / 2f, startRect.Y + (startRect.Height - sSize.Y) / 2f);
-                    var qPos = new Vector2(quitRect.X + (quitRect.Width - qSize.X) / 2f, quitRect.Y + (quitRect.Height - qSize.Y) / 2f);
-
-                    _spriteBatch.DrawString(_scoreFont, startText, sPos, XnaColor.White);
-                    _spriteBatch.DrawString(_scoreFont, quitText, qPos, XnaColor.White);
-
-                    string hint = "Entrée/Espace ou clic pour démarrer";
-                    var hSize = _scoreFont.MeasureString(hint);
-                    var hPos = new Vector2((_graphics.PreferredBackBufferWidth - hSize.X) / 2f, quitRect.Bottom + 24);
-                    _spriteBatch.DrawString(_scoreFont, hint, hPos, XnaColor.LightGray);
-                }
-
-                _spriteBatch.End();
-                base.Draw(gameTime);
-                return;
+                case GameState.MainMenu:
+                    DrawMainMenu();
+                    break;
+                case GameState.UsernameInput:
+                    DrawUsernameInput();
+                    break;
+                case GameState.Playing:
+                    DrawPlaying();
+                    break;
+                case GameState.GameOver:
+                    DrawGameOver();
+                    break;
+                case GameState.Leaderboard:
+                    DrawLeaderboard();
+                    break;
             }
 
+            _spriteBatch.End();
+            base.Draw(gameTime);
+        }
+
+        private void DrawMainMenu()
+        {
+            // Assombrir le fond
+            var overlay = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 160));
+
+            // Boutons
+            GetMenuLayout(out var startRect, out var leaderboardRect, out var quitRect);
+            var mouse = Mouse.GetState();
+            bool hoverStart = startRect.Contains(mouse.Position);
+            bool hoverLeaderboard = leaderboardRect.Contains(mouse.Position);
+            bool hoverQuit = quitRect.Contains(mouse.Position);
+
+            var startColor = hoverStart ? XnaColor.Lerp(XnaColor.DodgerBlue, XnaColor.White, 0.25f) : XnaColor.DodgerBlue;
+            var leaderboardColor = hoverLeaderboard ? XnaColor.Lerp(XnaColor.Orange, XnaColor.White, 0.25f) : XnaColor.Orange;
+            var quitColor = hoverQuit ? XnaColor.Lerp(XnaColor.DimGray, XnaColor.White, 0.25f) : XnaColor.DimGray;
+
+            _spriteBatch.Draw(_uiPixel, startRect, startColor);
+            _spriteBatch.Draw(_uiPixel, leaderboardRect, leaderboardColor);
+            _spriteBatch.Draw(_uiPixel, quitRect, quitColor);
+
+            // Titres et libellés
+            if (_scoreFont != null)
+            {
+                string title = "Menu Principal";
+                var tSize = _scoreFont.MeasureString(title);
+                var tPos = new Vector2((_graphics.PreferredBackBufferWidth - tSize.X) / 2f, _graphics.PreferredBackBufferHeight * 0.15f);
+                _spriteBatch.DrawString(_scoreFont, title, tPos, XnaColor.White);
+
+                string startText = "Démarrer";
+                string leaderboardText = "Classement";
+                string quitText = "Quitter";
+
+                var sSize = _scoreFont.MeasureString(startText);
+                var lSize = _scoreFont.MeasureString(leaderboardText);
+                var qSize = _scoreFont.MeasureString(quitText);
+
+                var sPos = new Vector2(startRect.X + (startRect.Width - sSize.X) / 2f, startRect.Y + (startRect.Height - sSize.Y) / 2f);
+                var lPos = new Vector2(leaderboardRect.X + (leaderboardRect.Width - lSize.X) / 2f, leaderboardRect.Y + (leaderboardRect.Height - lSize.Y) / 2f);
+                var qPos = new Vector2(quitRect.X + (quitRect.Width - qSize.X) / 2f, quitRect.Y + (quitRect.Height - qSize.Y) / 2f);
+
+                _spriteBatch.DrawString(_scoreFont, startText, sPos, XnaColor.White);
+                _spriteBatch.DrawString(_scoreFont, leaderboardText, lPos, XnaColor.White);
+                _spriteBatch.DrawString(_scoreFont, quitText, qPos, XnaColor.White);
+
+                string hint = "Entrée/Espace: Démarrer | L: Classement | F11/Alt+Enter: Plein écran";
+                var hSize = _scoreFont.MeasureString(hint);
+                var hPos = new Vector2((_graphics.PreferredBackBufferWidth - hSize.X) / 2f, quitRect.Bottom + 24);
+                _spriteBatch.DrawString(_scoreFont, hint, hPos, XnaColor.LightGray);
+            }
+        }
+
+        private void DrawLeaderboard()
+        {
+            // Assombrir le fond
+            var overlay = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 180));
+
+            if (_scoreFont != null)
+            {
+                // Titre
+                string title = "Meilleurs Scores";
+                var titleSize = _scoreFont.MeasureString(title);
+                var titlePos = new Vector2((_graphics.PreferredBackBufferWidth - titleSize.X) / 2f, _graphics.PreferredBackBufferHeight * 0.15f);
+                _spriteBatch.DrawString(_scoreFont, title, titlePos, XnaColor.White);
+
+                // Headers
+                float startY = titlePos.Y + titleSize.Y + 40f;
+                string rankHeader = "Rang";
+                string nameHeader = "Nom";
+                string scoreHeader = "Score";
+                string dateHeader = "Date";
+
+                float rankX = _graphics.PreferredBackBufferWidth * 0.15f;
+                float nameX = _graphics.PreferredBackBufferWidth * 0.3f;
+                float scoreX = _graphics.PreferredBackBufferWidth * 0.55f;
+                float dateX = _graphics.PreferredBackBufferWidth * 0.75f;
+
+                _spriteBatch.DrawString(_scoreFont, rankHeader, new Vector2(rankX, startY), XnaColor.Yellow);
+                _spriteBatch.DrawString(_scoreFont, nameHeader, new Vector2(nameX, startY), XnaColor.Yellow);
+                _spriteBatch.DrawString(_scoreFont, scoreHeader, new Vector2(scoreX, startY), XnaColor.Yellow);
+                _spriteBatch.DrawString(_scoreFont, dateHeader, new Vector2(dateX, startY), XnaColor.Yellow);
+
+                // Line separator
+                float lineY = startY + 30f;
+                var lineRect = new Rectangle((int)rankX, (int)lineY, (int)(dateX + 100 - rankX), 2);
+                _spriteBatch.Draw(_uiPixel, lineRect, XnaColor.Gray);
+
+                // Scores
+                float currentY = lineY + 20f;
+                for (int i = 0; i < Math.Min(_topScores.Count, 10); i++)
+                {
+                    var score = _topScores[i];
+                    
+                    // Alternate row colors
+                    var rowColor = i % 2 == 0 ? XnaColor.White : XnaColor.LightGray;
+                    
+                    // Highlight top 3
+                    if (i == 0) rowColor = XnaColor.Gold;
+                    else if (i == 1) rowColor = XnaColor.Silver;
+                    else if (i == 2) rowColor = XnaColor.FromNonPremultiplied(205, 127, 50, 255); // Bronze
+
+                    string rank = $"{i + 1}.";
+                    string name = score.PlayerName.Length > 12 ? score.PlayerName[..12] + "..." : score.PlayerName;
+                    string scoreText = $"{score.Score:N0}";
+                    string date = score.DateAchieved.ToString("dd/MM/yy");
+
+                    _spriteBatch.DrawString(_scoreFont, rank, new Vector2(rankX, currentY), rowColor);
+                    _spriteBatch.DrawString(_scoreFont, name, new Vector2(nameX, currentY), rowColor);
+                    _spriteBatch.DrawString(_scoreFont, scoreText, new Vector2(scoreX, currentY), rowColor);
+                    _spriteBatch.DrawString(_scoreFont, date, new Vector2(dateX, currentY), rowColor);
+
+                    currentY += 35f;
+                }
+
+                // Empty leaderboard message
+                if (_topScores.Count == 0)
+                {
+                    string emptyMessage = "Aucun score enregistré";
+                    var emptySize = _scoreFont.MeasureString(emptyMessage);
+                    var emptyPos = new Vector2((_graphics.PreferredBackBufferWidth - emptySize.X) / 2f, currentY + 40f);
+                    _spriteBatch.DrawString(_scoreFont, emptyMessage, emptyPos, XnaColor.Gray);
+                }
+
+                // Instructions
+                string instruction = "Appuyez sur n'importe quelle touche pour retourner au menu";
+                var instrSize = _scoreFont.MeasureString(instruction);
+                var instrPos = new Vector2((_graphics.PreferredBackBufferWidth - instrSize.X) / 2f, _graphics.PreferredBackBufferHeight * 0.85f);
+                _spriteBatch.DrawString(_scoreFont, instruction, instrPos, XnaColor.LightGray);
+            }
+        }
+
+        private void DrawUsernameInput()
+        {
+            // Assombrir le fond
+            var overlay = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 180));
+
+            if (_scoreFont != null)
+            {
+                // Titre
+                string title = "Entrez votre nom";
+                var titleSize = _scoreFont.MeasureString(title);
+                var titlePos = new Vector2((_graphics.PreferredBackBufferWidth - titleSize.X) / 2f, _graphics.PreferredBackBufferHeight * 0.3f);
+                _spriteBatch.DrawString(_scoreFont, title, titlePos, XnaColor.White);
+
+                // Champ de saisie
+                int inputWidth = 400;
+                int inputHeight = 50;
+                var inputRect = new Rectangle(
+                    (_graphics.PreferredBackBufferWidth - inputWidth) / 2,
+                    (int)(titlePos.Y + titleSize.Y + 40),
+                    inputWidth,
+                    inputHeight);
+
+                _spriteBatch.Draw(_uiPixel, inputRect, XnaColor.White);
+                _spriteBatch.Draw(_uiPixel, new Rectangle(inputRect.X + 2, inputRect.Y + 2, inputRect.Width - 4, inputRect.Height - 4), XnaColor.Black);
+
+                // Texte saisi
+                string displayText = _playerName + (_showCursor ? "|" : "");
+                var textSize = _scoreFont.MeasureString(displayText);
+                var textPos = new Vector2(inputRect.X + 10, inputRect.Y + (inputRect.Height - textSize.Y) / 2f);
+                _spriteBatch.DrawString(_scoreFont, displayText, textPos, XnaColor.White);
+
+                // Instructions
+                string instruction = "Tapez votre nom et appuyez sur Entrée pour commencer";
+                var instrSize = _scoreFont.MeasureString(instruction);
+                var instrPos = new Vector2((_graphics.PreferredBackBufferWidth - instrSize.X) / 2f, inputRect.Bottom + 30);
+                _spriteBatch.DrawString(_scoreFont, instruction, instrPos, XnaColor.LightGray);
+
+                string backInstruction = "Échap pour retourner au menu";
+                var backSize = _scoreFont.MeasureString(backInstruction);
+                var backPos = new Vector2((_graphics.PreferredBackBufferWidth - backSize.X) / 2f, instrPos.Y + instrSize.Y + 10);
+                _spriteBatch.DrawString(_scoreFont, backInstruction, backPos, XnaColor.Gray);
+            }
+        }
+
+        private void DrawPlaying()
+        {
             // Asteroids (blink visible: ignorer tous ceux avec Visible = false)
             foreach (var a in _asteroids)
             {
@@ -457,32 +765,48 @@ namespace gameTest2
             // Score + HP
             if (_scoreFont != null)
             {
-                string text = $"SCORE: {_scoreInt:N0}  HP: {_playerHp}";
+                string text = $"SCORE: {_scoreInt:N0}  HP: {_playerHp}  Joueur: {_playerName}";
                 var size = _scoreFont.MeasureString(text);
                 var pos = new Vector2(_graphics.PreferredBackBufferWidth - 10 - size.X, 10);
                 _spriteBatch.DrawString(_scoreFont, text, pos, XnaColor.White);
             }
+        }
 
-            // Overlay Game Over
-            if (_isPlayerDead)
+        private void DrawGameOver()
+        {
+            DrawPlaying(); // Draw the game state behind
+
+            var overlay = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 160));
+            
+            if (_scoreFont != null)
             {
-                var overlay = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-                _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 160));
-                if (_scoreFont != null)
-                {
-                    string over = "Game Over";
-                    string back = "Entrée/Espace ou clic pour retourner au menu";
-                    var oSize = _scoreFont.MeasureString(over);
-                    var bSize = _scoreFont.MeasureString(back);
-                    var oPos = new Vector2((_graphics.PreferredBackBufferWidth - oSize.X) / 2f, _graphics.PreferredBackBufferHeight * 0.4f);
-                    var bPos = new Vector2((_graphics.PreferredBackBufferWidth - bSize.X) / 2f, oPos.Y + oSize.Y + 16f);
-                    _spriteBatch.DrawString(_scoreFont, over, oPos, XnaColor.White);
-                    _spriteBatch.DrawString(_scoreFont, back, bPos, XnaColor.LightGray);
-                }
+                string over = "Game Over";
+                string scoreText = $"Score Final: {_scoreInt:N0}";
+                string playerText = $"Joueur: {_playerName}";
+                string savedText = "Score sauvegardé!";
+                string back = "Entrée/Espace ou clic pour retourner au menu";
+                
+                var oSize = _scoreFont.MeasureString(over);
+                var sSize = _scoreFont.MeasureString(scoreText);
+                var pSize = _scoreFont.MeasureString(playerText);
+                var savedSize = _scoreFont.MeasureString(savedText);
+                var bSize = _scoreFont.MeasureString(back);
+                
+                float startY = _graphics.PreferredBackBufferHeight * 0.3f;
+                
+                var oPos = new Vector2((_graphics.PreferredBackBufferWidth - oSize.X) / 2f, startY);
+                var sPos = new Vector2((_graphics.PreferredBackBufferWidth - sSize.X) / 2f, oPos.Y + oSize.Y + 20f);
+                var pPos = new Vector2((_graphics.PreferredBackBufferWidth - pSize.X) / 2f, sPos.Y + sSize.Y + 10f);
+                var savedPos = new Vector2((_graphics.PreferredBackBufferWidth - savedSize.X) / 2f, pPos.Y + pSize.Y + 10f);
+                var bPos = new Vector2((_graphics.PreferredBackBufferWidth - bSize.X) / 2f, savedPos.Y + savedSize.Y + 30f);
+                
+                _spriteBatch.DrawString(_scoreFont, over, oPos, XnaColor.White);
+                _spriteBatch.DrawString(_scoreFont, scoreText, sPos, XnaColor.Yellow);
+                _spriteBatch.DrawString(_scoreFont, playerText, pPos, XnaColor.Cyan);
+                _spriteBatch.DrawString(_scoreFont, savedText, savedPos, XnaColor.LightGreen);
+                _spriteBatch.DrawString(_scoreFont, back, bPos, XnaColor.LightGray);
             }
-
-            _spriteBatch.End();
-            base.Draw(gameTime);
         }
 
         private void UpdateEnemies(float dt)
@@ -516,7 +840,11 @@ namespace gameTest2
                     en.IsDying = true; en.Visible = false;
                     en.BlinkTimer = 0f; en.BlinkInterval = 0.15f; en.BlinkCount = 0; en.BlinkToggleTarget = 4;
                     _playerHp -= EnemyCollisionDamage;
-                    if (_playerHp <= 0) _isPlayerDead = true;
+                    if (_playerHp <= 0) 
+                    {
+                        _isPlayerDead = true;
+                        _scoreDatabase.SaveScore(_playerName, _scoreInt);
+                    }
                 }
 
                 if (en.IsDying)
@@ -568,7 +896,11 @@ namespace gameTest2
                     a.IsDying = true; a.Visible = false;
                     a.BlinkTimer = 0f; a.BlinkInterval = 0.18f; a.BlinkCount = 0; a.BlinkToggleTarget = 4;
                     _playerHp -= AsteroidCollisionDamage;
-                    if (_playerHp <= 0) _isPlayerDead = true;
+                    if (_playerHp <= 0) 
+                    {
+                        _isPlayerDead = true;
+                        _scoreDatabase.SaveScore(_playerName, _scoreInt);
+                    }
                 }
 
                 if (a.IsDying)
@@ -675,7 +1007,11 @@ namespace gameTest2
                     {
                         _lasers.RemoveAt(i);
                         _playerHp--;
-                        if (_playerHp <= 0) _isPlayerDead = true;
+                        if (_playerHp <= 0) 
+                        {
+                            _isPlayerDead = true;
+                            _scoreDatabase.SaveScore(_playerName, _scoreInt);
+                        }
                         continue;
                     }
                 }
@@ -813,7 +1149,7 @@ namespace gameTest2
         }
 
         // Menu helpers
-        private void GetMenuLayout(out Rectangle startRect, out Rectangle quitRect)
+        private void GetMenuLayout(out Rectangle startRect, out Rectangle leaderboardRect, out Rectangle quitRect)
         {
             int w = _graphics.PreferredBackBufferWidth;
             int h = _graphics.PreferredBackBufferHeight;
@@ -821,11 +1157,12 @@ namespace gameTest2
             int bw = Math.Min(360, w - 160);
             int bh = 64;
             int x = (w - bw) / 2;
-            int yStart = (int)(h * 0.45f);
+            int yStart = (int)(h * 0.4f);
             int spacing = 18;
 
             startRect = new Rectangle(x, yStart, bw, bh);
-            quitRect = new Rectangle(x, yStart + bh + spacing, bw, bh);
+            leaderboardRect = new Rectangle(x, yStart + bh + spacing, bw, bh);
+            quitRect = new Rectangle(x, yStart + 2 * (bh + spacing), bw, bh);
         }
 
         private void ResetGame()

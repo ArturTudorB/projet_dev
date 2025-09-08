@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <SourceFile>C:/Users/pd52nbo/Documents/projet_dev/gameTest2/gameTest2/Content/textures/background/frame30.png</SourceFile>
-  <SourceTime>2025-09-04T09:07:22.0209967+02:00</SourceTime>
-  <DestFile>C:/Users/pd52nbo/Documents/projet_dev/gameTest2/gameTest2/Content/bin/DesktopGL/Content/textures/background/frame30.xnb</DestFile>
-  <DestTime>2025-09-04T10:37:49.6079347+02:00</DestTime>
+  <SourceFile>C:/Users/pw10thu/3emeAnnee/projetDev1/projet_dev/gameTest2/gameTest2/Content/textures/background/frame30.png</SourceFile>
+  <SourceTime>2025-09-08T11:37:16.6028965+02:00</SourceTime>
+  <DestFile>C:/Users/pw10thu/3emeAnnee/projetDev1/projet_dev/gameTest2/gameTest2/Content/bin/DesktopGL/Content/textures/background/frame30.xnb</DestFile>
+  <DestTime>2025-09-08T11:38:08.4099406+02:00</DestTime>
   <Importer>TextureImporter</Importer>
   <ImporterTime>2025-06-02T12:31:02+02:00</ImporterTime>
   <Processor>TextureProcessor</Processor>

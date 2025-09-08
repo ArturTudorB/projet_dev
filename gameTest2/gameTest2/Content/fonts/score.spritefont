@@ -7,9 +7,20 @@
     <UseKerning>true</UseKerning>
     <Style>Regular</Style>
     <CharacterRegions>
+      <!-- ASCII de base -->
       <CharacterRegion>
-        <Start>32</Start>
-        <End>126</End>
+        <Start> </Start>
+        <End>~</End>
+      </CharacterRegion>
+      <!-- Latin-1 (accents français usuels) -->
+      <CharacterRegion>
+        <Start>À</Start>
+        <End>ÿ</End>
+      </CharacterRegion>
+      <!-- Ligatures françaises éventuelles -->
+      <CharacterRegion>
+        <Start>Œ</Start>
+        <End>œ</End>
       </CharacterRegion>
     </CharacterRegions>
   </Asset>

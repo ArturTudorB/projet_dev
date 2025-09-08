@@ -87,6 +87,11 @@ namespace gameTest2
         // Input
         private MouseState _previousMouseState;
 
+        // UI / Menu
+        private enum GameState { MainMenu, Playing }
+        private GameState _state = GameState.MainMenu;
+        private Texture2D _uiPixel;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this)
@@ -113,6 +118,10 @@ namespace gameTest2
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             LoadBackgroundFrames();
+
+            // UI pixel (1x1) pour rectangles/boutons
+            _uiPixel = new Texture2D(GraphicsDevice, 1, 1);
+            _uiPixel.SetData(new[] { XnaColor.White });
 
             // Player temp texture
             _playerTexture = new Texture2D(GraphicsDevice, 64, 64);
@@ -211,18 +220,70 @@ namespace gameTest2
 
         protected override void Update(GameTime gameTime)
         {
-            if (_isPlayerDead)
+            var mouse = Mouse.GetState();
+            var keyboard = Keyboard.GetState();
+
+            // Quitter via Échap depuis n'importe quel écran du menu
+            if (_state == GameState.MainMenu)
             {
+                // Background anim continue
+                float dtMenu = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_bgFrames.Count > 1)
+                {
+                    _bgFrameTimer += dtMenu;
+                    while (_bgFrameTimer >= BgFrameDuration)
+                    {
+                        _bgFrameTimer -= BgFrameDuration;
+                        _bgFrameIndex = (_bgFrameIndex + 1) % _bgFrames.Count;
+                    }
+                }
+
+                if (keyboard.IsKeyDown(Keys.Escape) ||
+                    GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+                {
+                    Exit();
+                }
+
+                // Layout et interactions
+                GetMenuLayout(out var startRect, out var quitRect);
+                bool click = mouse.LeftButton == ButtonState.Pressed &&
+                             _previousMouseState.LeftButton == ButtonState.Released;
+
+                if (keyboard.IsKeyDown(Keys.Enter) || keyboard.IsKeyDown(Keys.Space) ||
+                    (click && startRect.Contains(mouse.Position)))
+                {
+                    _state = GameState.Playing;
+                    ResetGame();
+                }
+                else if (click && quitRect.Contains(mouse.Position))
+                {
+                    Exit();
+                }
+
+                _previousMouseState = mouse;
                 base.Update(gameTime);
                 return;
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape) ||
+            // Ici: état Playing
+            // Retour au menu depuis l'écran Game Over
+            if (_isPlayerDead)
+            {
+                if (keyboard.IsKeyDown(Keys.Enter) || keyboard.IsKeyDown(Keys.Space) ||
+                    (mouse.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released))
+                {
+                    _state = GameState.MainMenu;
+                }
+                _previousMouseState = mouse;
+                base.Update(gameTime);
+                return;
+            }
+
+            if (keyboard.IsKeyDown(Keys.Escape) ||
                 GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 Exit();
 
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            _totalPlayTime += dt;
             _spawnedEnemyThisUpdate = false;
 
             // Background anim
@@ -236,19 +297,19 @@ namespace gameTest2
                 }
             }
 
-            // Score
+            // Score et temps de jeu
+            _totalPlayTime += dt;
             _score += dt * ScorePerSecond;
             _scoreInt = (int)_score;
 
             if (_shootCooldownTimer > 0f) _shootCooldownTimer -= dt;
 
             // Player movement
-            var k = Keyboard.GetState();
             Vector2 mv = Vector2.Zero;
-            if (k.IsKeyDown(Keys.W) || k.IsKeyDown(Keys.Up)) mv.Y -= 1;
-            if (k.IsKeyDown(Keys.S) || k.IsKeyDown(Keys.Down)) mv.Y += 1;
-            if (k.IsKeyDown(Keys.A) || k.IsKeyDown(Keys.Left)) mv.X -= 1;
-            if (k.IsKeyDown(Keys.D) || k.IsKeyDown(Keys.Right)) mv.X += 1;
+            if (keyboard.IsKeyDown(Keys.W) || keyboard.IsKeyDown(Keys.Up)) mv.Y -= 1;
+            if (keyboard.IsKeyDown(Keys.S) || keyboard.IsKeyDown(Keys.Down)) mv.Y += 1;
+            if (keyboard.IsKeyDown(Keys.A) || keyboard.IsKeyDown(Keys.Left)) mv.X -= 1;
+            if (keyboard.IsKeyDown(Keys.D) || keyboard.IsKeyDown(Keys.Right)) mv.X += 1;
             if (mv.LengthSquared() > 0)
             {
                 mv = Vector2.Normalize(mv) * _playerSpeed * dt;
@@ -257,7 +318,6 @@ namespace gameTest2
             _playerPosition += mv;
 
             // Shooting
-            var mouse = Mouse.GetState();
             if (mouse.LeftButton == ButtonState.Pressed &&
                 _previousMouseState.LeftButton == ButtonState.Released &&
                 _shootCooldownTimer <= 0f)
@@ -294,6 +354,135 @@ namespace gameTest2
 
             _previousMouseState = mouse;
             base.Update(gameTime);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(XnaColor.Black);
+            _spriteBatch.Begin();
+
+            // Background
+            if (_bgFrames.Count > 0)
+            {
+                var dest = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+                _spriteBatch.Draw(_bgFrames[_bgFrameIndex], dest, XnaColor.White);
+            }
+            else if (_bgFallback != null)
+            {
+                _spriteBatch.Draw(_bgFallback, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), XnaColor.Black);
+            }
+
+            if (_state == GameState.MainMenu)
+            {
+                // Assombrir le fond
+                var overlay = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+                _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 160));
+
+                // Boutons
+                GetMenuLayout(out var startRect, out var quitRect);
+                var mouse = Mouse.GetState();
+                bool hoverStart = startRect.Contains(mouse.Position);
+                bool hoverQuit = quitRect.Contains(mouse.Position);
+
+                var startColor = hoverStart ? XnaColor.Lerp(XnaColor.DodgerBlue, XnaColor.White, 0.25f) : XnaColor.DodgerBlue;
+                var quitColor = hoverQuit ? XnaColor.Lerp(XnaColor.DimGray, XnaColor.White, 0.25f) : XnaColor.DimGray;
+
+                _spriteBatch.Draw(_uiPixel, startRect, startColor);
+                _spriteBatch.Draw(_uiPixel, quitRect, quitColor);
+
+                // Titres et libellés
+                if (_scoreFont != null)
+                {
+                    string title = "Menu Principal";
+                    var tSize = _scoreFont.MeasureString(title);
+                    var tPos = new Vector2((_graphics.PreferredBackBufferWidth - tSize.X) / 2f, _graphics.PreferredBackBufferHeight * 0.18f);
+                    _spriteBatch.DrawString(_scoreFont, title, tPos, XnaColor.White);
+
+                    string startText = "Démarrer";
+                    string quitText = "Quitter";
+
+                    var sSize = _scoreFont.MeasureString(startText);
+                    var qSize = _scoreFont.MeasureString(quitText);
+
+                    var sPos = new Vector2(startRect.X + (startRect.Width - sSize.X) / 2f, startRect.Y + (startRect.Height - sSize.Y) / 2f);
+                    var qPos = new Vector2(quitRect.X + (quitRect.Width - qSize.X) / 2f, quitRect.Y + (quitRect.Height - qSize.Y) / 2f);
+
+                    _spriteBatch.DrawString(_scoreFont, startText, sPos, XnaColor.White);
+                    _spriteBatch.DrawString(_scoreFont, quitText, qPos, XnaColor.White);
+
+                    string hint = "Entrée/Espace ou clic pour démarrer";
+                    var hSize = _scoreFont.MeasureString(hint);
+                    var hPos = new Vector2((_graphics.PreferredBackBufferWidth - hSize.X) / 2f, quitRect.Bottom + 24);
+                    _spriteBatch.DrawString(_scoreFont, hint, hPos, XnaColor.LightGray);
+                }
+
+                _spriteBatch.End();
+                base.Draw(gameTime);
+                return;
+            }
+
+            // Asteroids (blink visible: ignorer tous ceux avec Visible = false)
+            foreach (var a in _asteroids)
+            {
+                if (!a.Visible) continue;
+                var tex = a.Texture;
+                _spriteBatch.Draw(tex, a.Position, null, XnaColor.White, 0f,
+                    new Vector2(tex.Width / 2f, tex.Height / 2f), 1f, SpriteEffects.None, 0f);
+            }
+
+            // Enemies
+            foreach (var en in _enemies)
+            {
+                if (!en.Visible) continue;
+                var tex = _enemyTextures[en.TextureIndex];
+                _spriteBatch.Draw(tex, en.Position, null, XnaColor.White, 0f,
+                    new Vector2(tex.Width / 2f, tex.Height / 2f), 1f, SpriteEffects.None, 0f);
+            }
+
+            // Lasers
+            foreach (var l in _lasers)
+            {
+                float rotation = (float)Math.Atan2(l.Velocity.Y, l.Velocity.X) + MathHelper.PiOver2;
+                var tint = l.IsEnemy ? XnaColor.OrangeRed : XnaColor.White;
+                _spriteBatch.Draw(_laserTexture, l.Position, null, tint, rotation,
+                    new Vector2(_laserTexture.Width / 2f, _laserTexture.Height / 2f), 1f,
+                    SpriteEffects.None, 0f);
+            }
+
+            // Player
+            _spriteBatch.Draw(_playerTexture, _playerPosition, null, XnaColor.White, 0f,
+                new Vector2(_playerTexture.Width / 2f, _playerTexture.Height / 2f), 1f,
+                SpriteEffects.None, 0f);
+
+            // Score + HP
+            if (_scoreFont != null)
+            {
+                string text = $"SCORE: {_scoreInt:N0}  HP: {_playerHp}";
+                var size = _scoreFont.MeasureString(text);
+                var pos = new Vector2(_graphics.PreferredBackBufferWidth - 10 - size.X, 10);
+                _spriteBatch.DrawString(_scoreFont, text, pos, XnaColor.White);
+            }
+
+            // Overlay Game Over
+            if (_isPlayerDead)
+            {
+                var overlay = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+                _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 160));
+                if (_scoreFont != null)
+                {
+                    string over = "Game Over";
+                    string back = "Entrée/Espace ou clic pour retourner au menu";
+                    var oSize = _scoreFont.MeasureString(over);
+                    var bSize = _scoreFont.MeasureString(back);
+                    var oPos = new Vector2((_graphics.PreferredBackBufferWidth - oSize.X) / 2f, _graphics.PreferredBackBufferHeight * 0.4f);
+                    var bPos = new Vector2((_graphics.PreferredBackBufferWidth - bSize.X) / 2f, oPos.Y + oSize.Y + 16f);
+                    _spriteBatch.DrawString(_scoreFont, over, oPos, XnaColor.White);
+                    _spriteBatch.DrawString(_scoreFont, back, bPos, XnaColor.LightGray);
+                }
+            }
+
+            _spriteBatch.End();
+            base.Draw(gameTime);
         }
 
         private void UpdateEnemies(float dt)
@@ -497,68 +686,6 @@ namespace gameTest2
             }
         }
 
-        protected override void Draw(GameTime gameTime)
-        {
-            GraphicsDevice.Clear(XnaColor.Black);
-            _spriteBatch.Begin();
-
-            // Background
-            if (_bgFrames.Count > 0)
-            {
-                var dest = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-                _spriteBatch.Draw(_bgFrames[_bgFrameIndex], dest, XnaColor.White);
-            }
-            else if (_bgFallback != null)
-            {
-                _spriteBatch.Draw(_bgFallback, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), XnaColor.Black);
-            }
-
-            // Asteroids (blink visible: ignorer tous ceux avec Visible = false)
-            foreach (var a in _asteroids)
-            {
-                if (!a.Visible) continue;
-                var tex = a.Texture;
-                _spriteBatch.Draw(tex, a.Position, null, XnaColor.White, 0f,
-                    new Vector2(tex.Width / 2f, tex.Height / 2f), 1f, SpriteEffects.None, 0f);
-            }
-
-            // Enemies
-            foreach (var en in _enemies)
-            {
-                if (!en.Visible) continue;
-                var tex = _enemyTextures[en.TextureIndex];
-                _spriteBatch.Draw(tex, en.Position, null, XnaColor.White, 0f,
-                    new Vector2(tex.Width / 2f, tex.Height / 2f), 1f, SpriteEffects.None, 0f);
-            }
-
-            // Lasers
-            foreach (var l in _lasers)
-            {
-                float rotation = (float)Math.Atan2(l.Velocity.Y, l.Velocity.X) + MathHelper.PiOver2;
-                var tint = l.IsEnemy ? XnaColor.OrangeRed : XnaColor.White;
-                _spriteBatch.Draw(_laserTexture, l.Position, null, tint, rotation,
-                    new Vector2(_laserTexture.Width / 2f, _laserTexture.Height / 2f), 1f,
-                    SpriteEffects.None, 0f);
-            }
-
-            // Player
-            _spriteBatch.Draw(_playerTexture, _playerPosition, null, XnaColor.White, 0f,
-                new Vector2(_playerTexture.Width / 2f, _playerTexture.Height / 2f), 1f,
-                SpriteEffects.None, 0f);
-
-            // Score + HP
-            if (_scoreFont != null)
-            {
-                string text = $"SCORE: {_scoreInt:N0}  HP: {_playerHp}";
-                var size = _scoreFont.MeasureString(text);
-                var pos = new Vector2(_graphics.PreferredBackBufferWidth - 10 - size.X, 10);
-                _spriteBatch.DrawString(_scoreFont, text, pos, XnaColor.White);
-            }
-
-            _spriteBatch.End();
-            base.Draw(gameTime);
-        }
-
         private void SpawnLaserTowards(Vector2 target, bool isEnemy, Vector2? origin = null)
         {
             Vector2 src = origin ?? _playerPosition;
@@ -683,6 +810,47 @@ namespace gameTest2
             int h = _graphics.PreferredBackBufferHeight;
             const int margin = 32;
             return pos.X < -margin || pos.X > w + margin || pos.Y < -margin || pos.Y > h + margin;
+        }
+
+        // Menu helpers
+        private void GetMenuLayout(out Rectangle startRect, out Rectangle quitRect)
+        {
+            int w = _graphics.PreferredBackBufferWidth;
+            int h = _graphics.PreferredBackBufferHeight;
+
+            int bw = Math.Min(360, w - 160);
+            int bh = 64;
+            int x = (w - bw) / 2;
+            int yStart = (int)(h * 0.45f);
+            int spacing = 18;
+
+            startRect = new Rectangle(x, yStart, bw, bh);
+            quitRect = new Rectangle(x, yStart + bh + spacing, bw, bh);
+        }
+
+        private void ResetGame()
+        {
+            _enemies.Clear();
+            _asteroids.Clear();
+            _lasers.Clear();
+
+            _playerHp = 5;
+            _isPlayerDead = false;
+            _playerPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
+            _facing = new Vector2(0, -1);
+
+            _score = 0.0;
+            _scoreInt = 0;
+            _totalPlayTime = 0f;
+
+            _enemySpawnTimer = 0f;
+            _asteroidSpawnTimer = 0f;
+            _shootCooldownTimer = 0f;
+
+            _bgFrameIndex = 0;
+            _bgFrameTimer = 0f;
+
+            _previousMouseState = Mouse.GetState();
         }
 
         // Structs

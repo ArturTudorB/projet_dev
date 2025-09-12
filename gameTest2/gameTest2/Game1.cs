@@ -12,6 +12,7 @@ namespace gameTest2
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+       
 
         // Background animation
         private readonly List<Texture2D> _bgFrames = new();

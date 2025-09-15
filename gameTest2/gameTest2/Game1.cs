@@ -53,25 +53,40 @@ namespace gameTest2
         private const int AsteroidMaxHp = 2;
         private const int AsteroidCollisionDamage = 3;
 
+        // Boss
+        private Texture2D _bossTexture;
+        private bool _bossActive = false;
+        private Vector2 _bossPosition;
+        private float _bossHp = 10;  // Reduced from 30 to 10 HP
+        private const float BossMaxHp = 10f;  // Reduced from 30 to 10 HP
+        private const float BossSpeed = 120f;  // Increased from 80 to 120 for speed boost
+        private float _bossHorizontalSpeed = 180f;  // Increased from 120 to 180 for speed boost
+        private float _bossHorizontalDir = 1f;  // 1 for right, -1 for left
+        private float _bossMovementTimer = 0f;
+        private const float BossMovementChangeInterval = 1.2f; // Reduced from 1.5 to 1.2 for faster direction changes
+        private bool _bossSpawned = false; // Track if boss has been spawned for this threshold
+
         private readonly Random _random = new();
         private float _totalPlayTime = 0f;
 
-        // Score & difficulty scaling
-        private double _score = 0.0;
-        private int _scoreInt = 0;
+        // Score & difficulty scaling - REPLACE THE EXISTING SECTION
+        private int _enemiesDestroyed = 0;  // Changed from _score and _scoreInt
         private SpriteFont _scoreFont;
 
-        private const double ScorePerSecond = 100.0;
-        private const double EnemyKillScore = 300.0;
+        // Remove these old constants:
+        // private const double ScorePerSecond = 100.0;
+        // private const double EnemyKillScore = 300.0;
+        
+        // Keep these for difficulty scaling but base on enemy count:
         private const float BaseEnemySpawnInterval = 5f;
         private const float MinEnemySpawnInterval = 1f;
-        private const int ScoreStepForDifficulty = 1000;
+        private const int EnemiesPerDifficultyStep = 10;  // Every 10 enemies destroyed, increase difficulty
         private const float ScoreIntervalReductionPerStep = 0.2f;
 
         // Enemy shooting difficulty
         private const float EnemyBaseShotMin = 2.0f;
         private const float EnemyBaseShotMax = 5.2f;
-        private const float EnemyShotDifficultyFactor = 0.00025f;
+        private const float EnemyShotDifficultyFactor = 0.025f;  // Increased since we're using smaller numbers
 
         // Enemy horizontal movement
         private const float EnemyHorizontalSpeedMin = 10f;
@@ -236,6 +251,33 @@ namespace gameTest2
             }
 
             try { _scoreFont = Content.Load<SpriteFont>("fonts/score"); } catch { _scoreFont = null; }
+
+            // Boss - with fallback texture creation
+            try 
+            { 
+                _bossTexture = Content.Load<Texture2D>("textures/boss/boss3"); // Changed from "textures/boss/boss" to "textures/boss/boss3"
+            } 
+            catch 
+            {
+                // Create fallback boss texture if loading fails
+                int bossSize = 96; // Larger than regular enemies
+                _bossTexture = new Texture2D(GraphicsDevice, bossSize, bossSize);
+                var bossPixels = new XnaColor[bossSize * bossSize];
+                for (int p = 0; p < bossPixels.Length; p++)
+                {
+                    int x = p % bossSize;
+                    int y = p / bossSize;
+                    
+                    // Create a distinctive boss pattern (red with black border)
+                    if (x < 4 || x > bossSize - 5 || y < 4 || y > bossSize - 5)
+                        bossPixels[p] = XnaColor.Black;
+                    else if (x < 8 || x > bossSize - 9 || y < 8 || y > bossSize - 9)
+                        bossPixels[p] = XnaColor.DarkRed;
+                    else
+                        bossPixels[p] = XnaColor.Red;
+                }
+                _bossTexture.SetData(bossPixels);
+            }
         }
 
         private void LoadBackgroundFrames()
@@ -324,8 +366,9 @@ namespace gameTest2
 
         private void UpdateMainMenu(KeyboardState keyboard, MouseState mouse)
         {
-            if (keyboard.IsKeyDown(Keys.Escape) ||
-                GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            // Remove Escape key handling from main menu - it should do nothing
+            // Only keep gamepad back button check for Xbox controller compatibility
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
             {
                 Exit();
             }
@@ -436,16 +479,24 @@ namespace gameTest2
                 return;
             }
 
-            if (keyboard.IsKeyDown(Keys.Escape) ||
-                GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                Exit();
+            // Change Escape behavior to go back to main menu instead of exiting
+            if (keyboard.IsKeyDown(Keys.Escape) && !_previousKeyboardState.IsKeyDown(Keys.Escape))
+            {
+                _state = GameState.MainMenu;
+                return;
+            }
+
+            // Keep gamepad back button for Xbox controller compatibility
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            {
+                _state = GameState.MainMenu;
+                return;
+            }
 
             _spawnedEnemyThisUpdate = false;
 
-            // Score et temps de jeu
+            // Only track time now - no time-based scoring
             _totalPlayTime += dt;
-            _score += dt * ScorePerSecond;
-            _scoreInt = (int)_score;
 
             if (_shootCooldownTimer > 0f) _shootCooldownTimer -= dt;
 
@@ -475,26 +526,46 @@ namespace gameTest2
                 _shootCooldownTimer = ShootCooldownSeconds;
             }
 
-            // Enemy spawn
-            int steps = _scoreInt / ScoreStepForDifficulty;
-            float enemyInterval = BaseEnemySpawnInterval - steps * ScoreIntervalReductionPerStep;
-            if (enemyInterval < MinEnemySpawnInterval) enemyInterval = MinEnemySpawnInterval;
-            _enemySpawnTimer += dt;
-            if (_enemySpawnTimer >= enemyInterval && !_spawnedEnemyThisUpdate)
+            // Boss logic: spawn if exactly 10 enemies destroyed and boss hasn't been spawned yet
+            if (!_bossActive && !_bossSpawned && _enemiesDestroyed >= 10)
             {
-                _enemySpawnTimer -= enemyInterval;
-                SpawnEnemy();
-                _spawnedEnemyThisUpdate = true;
+                _bossActive = true;
+                _bossSpawned = true;
+                _bossPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2f, -100);
+                _bossHp = BossMaxHp;
+                _bossHorizontalDir = _random.Next(0, 2) == 0 ? -1f : 1f; // Random initial direction
+                _bossMovementTimer = 0f;
             }
 
-            // Asteroid spawn
-            float asteroidInterval = AsteroidSpawnBaseInterval - (float)(_score * AsteroidSpawnDifficultyFactor);
-            if (asteroidInterval < AsteroidSpawnMinInterval) asteroidInterval = AsteroidSpawnMinInterval;
-            _asteroidSpawnTimer += dt;
-            if (_asteroidSpawnTimer >= asteroidInterval)
+            if (_bossActive)
             {
-                _asteroidSpawnTimer -= asteroidInterval;
-                SpawnAsteroid();
+                UpdateBoss(dt);
+            }
+
+            // Only spawn enemies and asteroids if boss is not active
+            if (!_bossActive)
+            {
+                // Enemy spawn - now based on enemies destroyed instead of score
+                int steps = _enemiesDestroyed / EnemiesPerDifficultyStep;
+                float enemyInterval = BaseEnemySpawnInterval - steps * ScoreIntervalReductionPerStep;
+                if (enemyInterval < MinEnemySpawnInterval) enemyInterval = MinEnemySpawnInterval;
+                _enemySpawnTimer += dt;
+                if (_enemySpawnTimer >= enemyInterval && !_spawnedEnemyThisUpdate)
+                {
+                    _enemySpawnTimer -= enemyInterval;
+                    SpawnEnemy();
+                    _spawnedEnemyThisUpdate = true;
+                }
+
+                // Asteroid spawn - simplified since we removed score-based calculation
+                float asteroidInterval = AsteroidSpawnBaseInterval - (_enemiesDestroyed * 0.1f);
+                if (asteroidInterval < AsteroidSpawnMinInterval) asteroidInterval = AsteroidSpawnMinInterval;
+                _asteroidSpawnTimer += dt;
+                if (_asteroidSpawnTimer >= asteroidInterval)
+                {
+                    _asteroidSpawnTimer -= asteroidInterval;
+                    SpawnAsteroid();
+                }
             }
 
             UpdateEnemies(dt);
@@ -621,7 +692,7 @@ namespace gameTest2
                 float startY = titlePos.Y + titleSize.Y + 40f;
                 string rankHeader = "Rang";
                 string nameHeader = "Nom";
-                string scoreHeader = "Score";
+                string scoreHeader = "Ennemis Détruits";  // Changed header text
                 string dateHeader = "Date";
 
                 float rankX = _graphics.PreferredBackBufferWidth * 0.15f;
@@ -655,7 +726,7 @@ namespace gameTest2
 
                     string rank = $"{i + 1}.";
                     string name = score.PlayerName.Length > 12 ? score.PlayerName[..12] + "..." : score.PlayerName;
-                    string scoreText = $"{score.Score:N0}";
+                    string scoreText = $"{score.Score}";  // No formatting needed for simple count
                     string date = score.DateAchieved.ToString("dd/MM/yy");
 
                     _spriteBatch.DrawString(_scoreFont, rank, new Vector2(rankX, currentY), rowColor);
@@ -763,10 +834,22 @@ namespace gameTest2
                 new Vector2(_playerTexture.Width / 2f, _playerTexture.Height / 2f), 1f,
                 SpriteEffects.None, 0f);
 
-            // Score + HP
+            // Boss - with proper null check
+            if (_bossActive && _bossTexture != null)
+            {
+                _spriteBatch.Draw(_bossTexture, _bossPosition, null, XnaColor.White, 0f,
+                    new Vector2(_bossTexture.Width / 2f, _bossTexture.Height / 2f), 1f,
+                    SpriteEffects.None, 0f);
+            }
+
+            // Score + HP + Boss HP (if active)
             if (_scoreFont != null)
             {
-                string text = $"SCORE: {_scoreInt:N0}  HP: {_playerHp}  Joueur: {_playerName}";
+                string text = $"SCORE: {_enemiesDestroyed}  HP: {_playerHp}  Joueur: {_playerName}";
+                if (_bossActive)
+                {
+                    text += $"  BOSS HP: {_bossHp}/{BossMaxHp}";
+                }
                 var size = _scoreFont.MeasureString(text);
                 var pos = new Vector2(_graphics.PreferredBackBufferWidth - 10 - size.X, 10);
                 _spriteBatch.DrawString(_scoreFont, text, pos, XnaColor.White);
@@ -783,7 +866,7 @@ namespace gameTest2
             if (_scoreFont != null)
             {
                 string over = "Game Over";
-                string scoreText = $"Score Final: {_scoreInt:N0}";
+                string scoreText = $"Ennemis Détruits: {_enemiesDestroyed}";  // Changed from final score
                 string playerText = $"Joueur: {_playerName}";
                 string savedText = "Score sauvegardé!";
                 string back = "Entrée/Espace ou clic pour retourner au menu";
@@ -827,7 +910,7 @@ namespace gameTest2
                     }
 
                     float horiz = en.HorizontalSpeed;
-                    float scale = 1f + MathF.Min(_scoreInt / 3000f, 1.5f);
+                    float scale = 1f + MathF.Min(_enemiesDestroyed / 30f, 1.5f);  // Scale based on enemies destroyed
                     en.Position.X += en.HorizontalDir * horiz * scale * dt;
 
                     float left = EnemyHorizontalEdgeMargin;
@@ -844,7 +927,7 @@ namespace gameTest2
                     if (_playerHp <= 0) 
                     {
                         _isPlayerDead = true;
-                        _scoreDatabase.SaveScore(_playerName, _scoreInt);
+                        _scoreDatabase.SaveScore(_playerName, _enemiesDestroyed);  // Save enemy count
                     }
                 }
 
@@ -875,7 +958,7 @@ namespace gameTest2
                 if (_totalPlayTime >= en.NextShotTime)
                 {
                     SpawnLaserTowards(_playerPosition, true, en.Position);
-                    float diff = (float)Math.Clamp(1.0 - (_scoreInt * EnemyShotDifficultyFactor), 0.4, 1.0);
+                    float diff = (float)Math.Clamp(1.0 - (_enemiesDestroyed * EnemyShotDifficultyFactor), 0.4, 1.0);  // Use enemy count
                     float minShot = EnemyBaseShotMin * diff;
                     float maxShot = EnemyBaseShotMax * diff;
                     en.NextShotTime = _totalPlayTime + (float)(_random.NextDouble() * (maxShot - minShot) + minShot);
@@ -900,7 +983,7 @@ namespace gameTest2
                     if (_playerHp <= 0) 
                     {
                         _isPlayerDead = true;
-                        _scoreDatabase.SaveScore(_playerName, _scoreInt);
+                        _scoreDatabase.SaveScore(_playerName, _enemiesDestroyed);  // Save enemy count
                     }
                 }
 
@@ -943,6 +1026,21 @@ namespace gameTest2
 
                 if (!l.IsEnemy)
                 {
+                    // Boss collision with player lasers
+                    if (_bossActive && CheckLaserHitsBoss(l.Position))
+                    {
+                        _bossHp--;
+                        _lasers.RemoveAt(i);
+                        
+                        // Check if boss is defeated
+                        if (_bossHp <= 0)
+                        {
+                            _bossActive = false;
+                            _enemiesDestroyed += 5; // Boss counts as 5 enemies destroyed
+                        }
+                        continue;
+                    }
+
                     // Enemies
                     for (int ei = 0; ei < _enemies.Count; ei++)
                     {
@@ -963,7 +1061,7 @@ namespace gameTest2
                             en.IsDying = true; en.Visible = false;
                             en.BlinkTimer = 0f; en.BlinkInterval = 0.15f; en.BlinkCount = 0; en.BlinkToggleTarget = 4;
                             _enemies[ei] = en;
-                            _score += EnemyKillScore; _scoreInt = (int)_score;
+                            _enemiesDestroyed++;  // Increment enemy kill count instead of adding score
                             _lasers.RemoveAt(i);
                             removed = true;
                             break;
@@ -1011,7 +1109,7 @@ namespace gameTest2
                         if (_playerHp <= 0) 
                         {
                             _isPlayerDead = true;
-                            _scoreDatabase.SaveScore(_playerName, _scoreInt);
+                            _scoreDatabase.SaveScore(_playerName, _enemiesDestroyed);  // Save enemy count instead of score
                         }
                         continue;
                     }
@@ -1042,12 +1140,12 @@ namespace gameTest2
             Vector2 pos = new(_random.Next(margin, w - margin), -margin);
             int texIndex = _random.Next(_enemyTextures.Length);
 
-            float diff = (float)Math.Clamp(1.0 - (_scoreInt * EnemyShotDifficultyFactor), 0.4, 1.0);
+            float diff = (float)Math.Clamp(1.0 - (_enemiesDestroyed * EnemyShotDifficultyFactor), 0.4, 1.0);  // Use enemy count
             float minShot = EnemyBaseShotMin * diff;
             float maxShot = EnemyBaseShotMax * diff;
 
             float baseHoriz = (float)(_random.NextDouble() * (EnemyHorizontalSpeedMax - EnemyHorizontalSpeedMin) + EnemyHorizontalSpeedMin);
-            float speedScale = 1f + MathF.Min(_scoreInt / 5000f, 1.2f);
+            float speedScale = 1f + MathF.Min(_enemiesDestroyed / 50f, 1.2f);  // Scale based on enemies destroyed
             float horizSpeed = baseHoriz * speedScale;
 
             Enemy en = new()
@@ -1092,6 +1190,61 @@ namespace gameTest2
                 BlinkToggleTarget = 4
             };
             _asteroids.Add(a);
+        }
+
+        private void UpdateBoss(float dt)
+        {
+            // Move boss down towards middle of screen, but stop at half screen height
+            float halfScreenHeight = _graphics.PreferredBackBufferHeight / 2f;
+            if (_bossPosition.Y < halfScreenHeight)
+            {
+                _bossPosition.Y += BossSpeed * dt;
+                if (_bossPosition.Y > halfScreenHeight)
+                    _bossPosition.Y = halfScreenHeight;
+            }
+
+            // Horizontal movement - keeps boss moving (faster now)
+            _bossMovementTimer += dt;
+            if (_bossMovementTimer >= BossMovementChangeInterval)
+            {
+                _bossMovementTimer -= BossMovementChangeInterval;
+                _bossHorizontalDir = -_bossHorizontalDir; // Change direction
+                
+                // Increased speed range for more aggressive movement
+                _bossHorizontalSpeed = (float)(_random.NextDouble() * 120 + 100); // Speed between 100-220 (was 60-140)
+            }
+
+            // Apply horizontal movement
+            _bossPosition.X += _bossHorizontalDir * _bossHorizontalSpeed * dt;
+
+            // Keep boss within screen bounds with some margin
+            float margin = 100f;
+            if (_bossPosition.X < margin)
+            {
+                _bossPosition.X = margin;
+                _bossHorizontalDir = 1f; // Force right movement
+                _bossMovementTimer = 0f; // Reset timer for immediate direction change
+            }
+            else if (_bossPosition.X > _graphics.PreferredBackBufferWidth - margin)
+            {
+                _bossPosition.X = _graphics.PreferredBackBufferWidth - margin;
+                _bossHorizontalDir = -1f; // Force left movement
+                _bossMovementTimer = 0f; // Reset timer for immediate direction change
+            }
+
+            // Boss collision with player
+            if (CheckBossHitsPlayer())
+            {
+                _playerHp -= 5; // Boss does more damage than regular enemies
+                if (_playerHp <= 0)
+                {
+                    _isPlayerDead = true;
+                    _scoreDatabase.SaveScore(_playerName, _enemiesDestroyed);
+                }
+                
+                // Push boss back up slightly after hitting player
+                _bossPosition.Y = Math.Max(_bossPosition.Y - 50, halfScreenHeight - 100);
+            }
         }
 
         private bool CheckEnemyHitsPlayer(Enemy en)
@@ -1141,6 +1294,40 @@ namespace gameTest2
             return playerRect.Intersects(laserRect);
         }
 
+        private bool CheckBossHitsPlayer()
+        {
+            if (!_bossActive || _bossTexture == null) return false;
+            
+            var bossRect = new Rectangle(
+                (int)(_bossPosition.X - _bossTexture.Width / 2f),
+                (int)(_bossPosition.Y - _bossTexture.Height / 2f),
+                _bossTexture.Width,
+                _bossTexture.Height);
+            var playerRect = new Rectangle(
+                (int)(_playerPosition.X - _playerTexture.Width / 2f),
+                (int)(_playerPosition.Y - _playerTexture.Height / 2f),
+                _playerTexture.Width,
+                _playerTexture.Height);
+            return bossRect.Intersects(playerRect);
+        }
+
+        private bool CheckLaserHitsBoss(Vector2 laserPos)
+        {
+            if (!_bossActive || _bossTexture == null) return false;
+            
+            var bossRect = new Rectangle(
+                (int)(_bossPosition.X - _bossTexture.Width / 2f),
+                (int)(_bossPosition.Y - _bossTexture.Height / 2f),
+                _bossTexture.Width,
+                _bossTexture.Height);
+            var laserRect = new Rectangle(
+                (int)(laserPos.X - _laserTexture.Width / 2f),
+                (int)(laserPos.Y - _laserTexture.Height / 2f),
+                _laserTexture.Width,
+                _laserTexture.Height);
+            return bossRect.Intersects(laserRect);
+        }
+
         private bool IsOffScreen(Vector2 pos)
         {
             int w = _graphics.PreferredBackBufferWidth;
@@ -1177,13 +1364,18 @@ namespace gameTest2
             _playerPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
             _facing = new Vector2(0, -1);
 
-            _score = 0.0;
-            _scoreInt = 0;
+            _enemiesDestroyed = 0;  // Reset enemy counter instead of score
             _totalPlayTime = 0f;
 
             _enemySpawnTimer = 0f;
             _asteroidSpawnTimer = 0f;
             _shootCooldownTimer = 0f;
+
+            // Reset boss variables
+            _bossActive = false;
+            _bossSpawned = false;
+            _bossHp = BossMaxHp;
+            _bossMovementTimer = 0f;
 
             _bgFrameIndex = 0;
             _bgFrameTimer = 0f;

@@ -57,8 +57,10 @@
     <File>C:/Users/pw10thu/3emeAnnee/projetDev1/projet_dev/gameTest2/gameTest2/Content/fonts/score.spritefont</File>
     <File>C:/Users/pw10thu/3emeAnnee/projetDev1/projet_dev/gameTest2/gameTest2/Content/textures/asteroide/asteroide1.png</File>
     <File>C:/Users/pw10thu/3emeAnnee/projetDev1/projet_dev/gameTest2/gameTest2/Content/textures/asteroide/asteroide2.png</File>
+    <File>C:/Users/pw10thu/3emeAnnee/projetDev1/projet_dev/gameTest2/gameTest2/Content/textures/boss/boss3.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

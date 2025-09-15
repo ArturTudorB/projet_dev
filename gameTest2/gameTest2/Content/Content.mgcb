@@ -634,3 +634,15 @@
 /processorParam:MakeSquare=False
 /build:textures/asteroide/asteroide1.png
 /build:textures/asteroide/asteroide2.png
+
+#begin textures/boss/boss3.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:textures/boss/boss3.png

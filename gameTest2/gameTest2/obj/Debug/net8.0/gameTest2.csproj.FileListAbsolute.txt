@@ -177,3 +177,4 @@ C:\Users\pw10thu\3emeAnnee\projetDev1\projet_dev\gameTest2\gameTest2\bin\Debug\n
 C:\Users\pw10thu\3emeAnnee\projetDev1\projet_dev\gameTest2\gameTest2\bin\Debug\net8.0\runtimes\osx-x64\native\SQLite.Interop.dll
 C:\Users\pw10thu\3emeAnnee\projetDev1\projet_dev\gameTest2\gameTest2\bin\Debug\net8.0\runtimes\win-x64\native\SQLite.Interop.dll
 C:\Users\pw10thu\3emeAnnee\projetDev1\projet_dev\gameTest2\gameTest2\bin\Debug\net8.0\runtimes\win-x86\native\SQLite.Interop.dll
+C:\Users\pw10thu\3emeAnnee\projetDev1\projet_dev\gameTest2\gameTest2\bin\Debug\net8.0\Content\textures\boss\boss3.xnb

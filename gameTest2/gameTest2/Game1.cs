@@ -69,18 +69,20 @@ namespace gameTest2
         private readonly Random _random = new();
         private float _totalPlayTime = 0f;
 
-        // Score & difficulty scaling - REPLACE THE EXISTING SECTION
-        private int _enemiesDestroyed = 0;  // Changed from _score and _scoreInt
+        // Score & difficulty scaling - RESTORED SCORE SYSTEM
+        private int _enemiesDestroyed = 0;  // Keep for boss spawn condition
+        private double _score = 0.0;  // Restored score system
+        private int _scoreInt = 0;  // Display score as integer
         private SpriteFont _scoreFont;
 
-        // Remove these old constants:
-        // private const double ScorePerSecond = 100.0;
-        // private const double EnemyKillScore = 300.0;
+        // Restored score constants
+        private const double ScorePerSecond = 100.0;
+        private const double EnemyKillScore = 300.0;
         
-        // Keep these for difficulty scaling but base on enemy count:
+        // Keep these for difficulty scaling but base on score again:
         private const float BaseEnemySpawnInterval = 5f;
         private const float MinEnemySpawnInterval = 1f;
-        private const int EnemiesPerDifficultyStep = 10;  // Every 10 enemies destroyed, increase difficulty
+        private const int ScoreDifficultyStep = 3000;  // Every 3000 points, increase difficulty
         private const float ScoreIntervalReductionPerStep = 0.2f;
 
         // Enemy shooting difficulty
@@ -495,8 +497,10 @@ namespace gameTest2
 
             _spawnedEnemyThisUpdate = false;
 
-            // Only track time now - no time-based scoring
+            // Restored time-based scoring
             _totalPlayTime += dt;
+            _score += ScorePerSecond * dt;
+            _scoreInt = (int)Math.Round(_score);
 
             if (_shootCooldownTimer > 0f) _shootCooldownTimer -= dt;
 
@@ -545,8 +549,8 @@ namespace gameTest2
             // Only spawn enemies and asteroids if boss is not active
             if (!_bossActive)
             {
-                // Enemy spawn - now based on enemies destroyed instead of score
-                int steps = _enemiesDestroyed / EnemiesPerDifficultyStep;
+                // Enemy spawn - back to score-based difficulty scaling
+                int steps = _scoreInt / ScoreDifficultyStep;
                 float enemyInterval = BaseEnemySpawnInterval - steps * ScoreIntervalReductionPerStep;
                 if (enemyInterval < MinEnemySpawnInterval) enemyInterval = MinEnemySpawnInterval;
                 _enemySpawnTimer += dt;
@@ -557,8 +561,8 @@ namespace gameTest2
                     _spawnedEnemyThisUpdate = true;
                 }
 
-                // Asteroid spawn - simplified since we removed score-based calculation
-                float asteroidInterval = AsteroidSpawnBaseInterval - (_enemiesDestroyed * 0.1f);
+                // Asteroid spawn - back to score-based calculation
+                float asteroidInterval = AsteroidSpawnBaseInterval - (_scoreInt * AsteroidSpawnDifficultyFactor);
                 if (asteroidInterval < AsteroidSpawnMinInterval) asteroidInterval = AsteroidSpawnMinInterval;
                 _asteroidSpawnTimer += dt;
                 if (_asteroidSpawnTimer >= asteroidInterval)
@@ -688,11 +692,11 @@ namespace gameTest2
                 var titlePos = new Vector2((_graphics.PreferredBackBufferWidth - titleSize.X) / 2f, _graphics.PreferredBackBufferHeight * 0.15f);
                 _spriteBatch.DrawString(_scoreFont, title, titlePos, XnaColor.White);
 
-                // Headers
+                // Headers - RESTORED SCORE HEADER
                 float startY = titlePos.Y + titleSize.Y + 40f;
                 string rankHeader = "Rang";
                 string nameHeader = "Nom";
-                string scoreHeader = "Ennemis Détruits";  // Changed header text
+                string scoreHeader = "Score";  // Changed back to "Score"
                 string dateHeader = "Date";
 
                 float rankX = _graphics.PreferredBackBufferWidth * 0.15f;
@@ -726,7 +730,7 @@ namespace gameTest2
 
                     string rank = $"{i + 1}.";
                     string name = score.PlayerName.Length > 12 ? score.PlayerName[..12] + "..." : score.PlayerName;
-                    string scoreText = $"{score.Score}";  // No formatting needed for simple count
+                    string scoreText = $"{score.Score:N0}";  // Formatted score display
                     string date = score.DateAchieved.ToString("dd/MM/yy");
 
                     _spriteBatch.DrawString(_scoreFont, rank, new Vector2(rankX, currentY), rowColor);
@@ -842,10 +846,10 @@ namespace gameTest2
                     SpriteEffects.None, 0f);
             }
 
-            // Score + HP + Boss HP (if active)
+            // Score + HP + Boss HP (if active) - RESTORED SCORE DISPLAY
             if (_scoreFont != null)
             {
-                string text = $"SCORE: {_enemiesDestroyed}  HP: {_playerHp}  Joueur: {_playerName}";
+                string text = $"SCORE: {_scoreInt}  HP: {_playerHp}  Joueur: {_playerName}";
                 if (_bossActive)
                 {
                     text += $"  BOSS HP: {_bossHp}/{BossMaxHp}";
@@ -910,7 +914,7 @@ namespace gameTest2
                     }
 
                     float horiz = en.HorizontalSpeed;
-                    float scale = 1f + MathF.Min(_enemiesDestroyed / 30f, 1.5f);  // Scale based on enemies destroyed
+                    float scale = 1f + MathF.Min(_scoreInt / 9000f, 1.5f);  // Scale based on score again
                     en.Position.X += en.HorizontalDir * horiz * scale * dt;
 
                     float left = EnemyHorizontalEdgeMargin;
@@ -927,7 +931,7 @@ namespace gameTest2
                     if (_playerHp <= 0) 
                     {
                         _isPlayerDead = true;
-                        _scoreDatabase.SaveScore(_playerName, _enemiesDestroyed);  // Save enemy count
+                        _scoreDatabase.SaveScore(_playerName, _scoreInt);  // Save final score
                     }
                 }
 
@@ -958,7 +962,7 @@ namespace gameTest2
                 if (_totalPlayTime >= en.NextShotTime)
                 {
                     SpawnLaserTowards(_playerPosition, true, en.Position);
-                    float diff = (float)Math.Clamp(1.0 - (_enemiesDestroyed * EnemyShotDifficultyFactor), 0.4, 1.0);  // Use enemy count
+                    float diff = (float)Math.Clamp(1.0 - (_scoreInt * 0.000025), 0.4, 1.0);  // Back to score-based difficulty
                     float minShot = EnemyBaseShotMin * diff;
                     float maxShot = EnemyBaseShotMax * diff;
                     en.NextShotTime = _totalPlayTime + (float)(_random.NextDouble() * (maxShot - minShot) + minShot);
@@ -983,7 +987,7 @@ namespace gameTest2
                     if (_playerHp <= 0) 
                     {
                         _isPlayerDead = true;
-                        _scoreDatabase.SaveScore(_playerName, _enemiesDestroyed);  // Save enemy count
+                        _scoreDatabase.SaveScore(_playerName, _scoreInt);  // Save final score
                     }
                 }
 
@@ -1036,7 +1040,9 @@ namespace gameTest2
                         if (_bossHp <= 0)
                         {
                             _bossActive = false;
-                            _enemiesDestroyed += 5; // Boss counts as 5 enemies destroyed
+                            _enemiesDestroyed += 5; // Boss counts as 5 enemies destroyed (for future boss spawns)
+                            _score += EnemyKillScore * 10; // Boss gives 10x enemy score bonus
+                            _scoreInt = (int)Math.Round(_score);
                         }
                         continue;
                     }
@@ -1061,7 +1067,9 @@ namespace gameTest2
                             en.IsDying = true; en.Visible = false;
                             en.BlinkTimer = 0f; en.BlinkInterval = 0.15f; en.BlinkCount = 0; en.BlinkToggleTarget = 4;
                             _enemies[ei] = en;
-                            _enemiesDestroyed++;  // Increment enemy kill count instead of adding score
+                            _enemiesDestroyed++;  // Keep enemy count for boss spawn
+                            _score += EnemyKillScore;  // Add score for enemy kill
+                            _scoreInt = (int)Math.Round(_score);
                             _lasers.RemoveAt(i);
                             removed = true;
                             break;
@@ -1092,6 +1100,8 @@ namespace gameTest2
                             {
                                 a.IsDying = true; a.Visible = false;
                                 a.BlinkTimer = 0f; a.BlinkInterval = 0.18f; a.BlinkCount = 0; a.BlinkToggleTarget = 4;
+                                _score += EnemyKillScore * 0.5; // Asteroids give half points
+                                _scoreInt = (int)Math.Round(_score);
                             }
                             _asteroids[ai] = a;
                             _lasers.RemoveAt(i);
@@ -1109,7 +1119,7 @@ namespace gameTest2
                         if (_playerHp <= 0) 
                         {
                             _isPlayerDead = true;
-                            _scoreDatabase.SaveScore(_playerName, _enemiesDestroyed);  // Save enemy count instead of score
+                            _scoreDatabase.SaveScore(_playerName, _scoreInt);  // Save final score
                         }
                         continue;
                     }
@@ -1140,12 +1150,12 @@ namespace gameTest2
             Vector2 pos = new(_random.Next(margin, w - margin), -margin);
             int texIndex = _random.Next(_enemyTextures.Length);
 
-            float diff = (float)Math.Clamp(1.0 - (_enemiesDestroyed * EnemyShotDifficultyFactor), 0.4, 1.0);  // Use enemy count
+            float diff = (float)Math.Clamp(1.0 - (_scoreInt * 0.000025), 0.4, 1.0);  // Back to score-based difficulty
             float minShot = EnemyBaseShotMin * diff;
             float maxShot = EnemyBaseShotMax * diff;
 
             float baseHoriz = (float)(_random.NextDouble() * (EnemyHorizontalSpeedMax - EnemyHorizontalSpeedMin) + EnemyHorizontalSpeedMin);
-            float speedScale = 1f + MathF.Min(_enemiesDestroyed / 50f, 1.2f);  // Scale based on enemies destroyed
+            float speedScale = 1f + MathF.Min(_scoreInt / 15000f, 1.2f);  // Scale based on score
             float horizSpeed = baseHoriz * speedScale;
 
             Enemy en = new()
@@ -1239,7 +1249,7 @@ namespace gameTest2
                 if (_playerHp <= 0)
                 {
                     _isPlayerDead = true;
-                    _scoreDatabase.SaveScore(_playerName, _enemiesDestroyed);
+                    _scoreDatabase.SaveScore(_playerName, _scoreInt);  // Save final score
                 }
                 
                 // Push boss back up slightly after hitting player
@@ -1364,7 +1374,9 @@ namespace gameTest2
             _playerPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
             _facing = new Vector2(0, -1);
 
-            _enemiesDestroyed = 0;  // Reset enemy counter instead of score
+            _enemiesDestroyed = 0;  // Reset enemy counter for boss spawn
+            _score = 0.0;  // Reset score
+            _scoreInt = 0;  // Reset score display
             _totalPlayTime = 0f;
 
             _enemySpawnTimer = 0f;

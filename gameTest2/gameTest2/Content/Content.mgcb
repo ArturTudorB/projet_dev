@@ -635,6 +635,30 @@
 /build:textures/asteroide/asteroide1.png
 /build:textures/asteroide/asteroide2.png
 
+#begin textures/boss/boss1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:textures/boss/boss1.png
+
+#begin textures/boss/boss2.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:textures/boss/boss2.png
+
 #begin textures/boss/boss3.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -646,3 +670,27 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:textures/boss/boss3.png
+
+#begin textures/boss/boss4.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:textures/boss/boss4.png
+
+#begin game_music/son_du_clic_menu.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:game_music/son_du_clic_menu.mp3
+
+#begin game_music/main_menu_music.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:game_music/main_menu_music.mp3

@@ -63,8 +63,18 @@
     <File>C:/Users/pd52nbo/Desktop/projet_dev/gameTest2/gameTest2/Content/textures/boss/boss4.png</File>
     <File>C:/Users/pd52nbo/Desktop/projet_dev/gameTest2/gameTest2/Content/game_music/son_du_clic_menu.mp3</File>
     <File>C:/Users/pd52nbo/Desktop/projet_dev/gameTest2/gameTest2/Content/game_music/main_menu_music.mp3</File>
+    <File>C:/Users/pd52nbo/Desktop/projet_dev/gameTest2/gameTest2/Content/textures/buff/vitesse.png</File>
+    <File>C:/Users/pd52nbo/Desktop/projet_dev/gameTest2/gameTest2/Content/textures/buff/cadence.png</File>
+    <File>C:/Users/pd52nbo/Desktop/projet_dev/gameTest2/gameTest2/Content/textures/buff/tirMultiple.png</File>
+    <File>C:/Users/pd52nbo/Desktop/projet_dev/gameTest2/gameTest2/Content/textures/buff/immunite.png</File>
+    <File>C:/Users/pd52nbo/Desktop/projet_dev/gameTest2/gameTest2/Content/textures/buff/soin.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

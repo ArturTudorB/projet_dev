@@ -1,0 +1,795 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
+using XnaColor = Microsoft.Xna.Framework.Color;
+using gameTest2.Models;
+using gameTest2.Config;
+using gameTest2.Systems;
+using gameTest2.Rendering;
+
+namespace gameTest2
+{
+    public class Game1 : Game
+    {
+        private GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
+
+        // Sound Effects and Music
+        private AudioManager _audioManager;       // Remplaced by AudioManager
+        
+        // Collision Detection
+        private CollisionDetector _collisionDetector;
+        
+        // Entity Spawning
+        private EntitySpawner _entitySpawner;
+        
+        // Entity Updating
+        private EntityUpdater _entityUpdater;
+        
+        // Content Loading
+        private ContentLoader _contentLoader;
+        
+        // Input Handling
+        private InputManager _inputManager;
+        
+        // Background Animation
+        private BackgroundAnimator _backgroundAnimator;
+        
+        // Rendering
+        private GameplayRenderer _gameplayRenderer;
+        private MenuRenderer _menuRenderer;
+
+        // Player
+        private Player _player;
+
+        // Lasers
+        private Texture2D _laserTexture;
+        private readonly List<Laser> _lasers = new();
+        private float _laserSpeedMultiplier = GameConstants.LaserSpeedMultiplier;
+
+        // Enemies
+        private Texture2D[] _enemyTextures = new Texture2D[GameConstants.EnemyTextureCount];
+        private readonly List<Enemy> _enemies = new();
+        private float _enemySpawnTimer = 0f;
+        private bool _spawnedEnemyThisUpdate = false;
+
+        // Asteroids
+        private Texture2D[] _asteroidTextures = new Texture2D[GameConstants.AsteroidTextureCount];
+        private readonly List<Asteroid> _asteroids = new();
+        private float _asteroidSpawnTimer = 0f;
+
+        // Buffs / Power-ups
+        private Texture2D[] _buffTextures = new Texture2D[5];
+        private readonly List<BuffPickup> _buffPickups = new();
+        
+        // Boss
+        private Texture2D[] _bossTextures = new Texture2D[GameConstants.BossTextureCount];
+        private int _currentBossTextureIndex = 0;
+        private bool _bossActive = false;
+        private Vector2 _bossPosition;
+        private float _bossHp = GameConstants.BossMaxHp;
+        private float _bossHorizontalSpeed = GameConstants.BossHorizontalSpeed;
+        private float _bossHorizontalDir = 1f;
+        private float _bossMovementTimer = 0f;
+        private int _bossesDefeated = 0;
+
+        // Boss shooting variables
+        private float _bossShootTimer = 0f;
+        private int _bossShotsFired = 0;
+        private float _bossBurstTimer = 0f;
+        private bool _bossIsBursting = false;
+
+        private readonly Random _random = new();
+        private float _totalPlayTime = 0f;
+
+        // Score & difficulty scaling
+        private int _enemiesDestroyed = 0;
+        private double _score = 0.0;
+        private int _scoreInt = 0;
+        private SpriteFont _scoreFont;
+
+        // UI / Menu
+        private enum GameState { MainMenu, UsernameInput, Playing, GameOver, Leaderboard }
+        private GameState _state = GameState.MainMenu;
+        private Texture2D _uiPixel;
+
+        // Username input
+        private string _playerName = "";
+        private bool _showCursor = true;
+        private float _cursorBlinkTimer = 0f;
+
+        // Database
+        private ScoreDatabase _scoreDatabase;
+
+        // Leaderboard
+        private List<ScoreEntry> _topScores = new();
+
+        public Game1()
+        {
+            _graphics = new GraphicsDeviceManager(this);
+            
+            // Set fullscreen mode
+            _graphics.IsFullScreen = true;
+            
+            // Optional: Set preferred resolution for fullscreen (uses desktop resolution by default)
+            // _graphics.PreferredBackBufferWidth = 1920;
+            // _graphics.PreferredBackBufferHeight = 1080;
+            
+            // If you want to use desktop resolution, get it from GraphicsAdapter
+            var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+            _graphics.PreferredBackBufferWidth = displayMode.Width;
+            _graphics.PreferredBackBufferHeight = displayMode.Height;
+            
+            _graphics.ApplyChanges();
+            Content.RootDirectory = "Content";
+            IsMouseVisible = true;
+        }
+
+        protected override void Initialize()
+        {
+            Vector2 startPosition = new Vector2(
+                _graphics.PreferredBackBufferWidth / 2f,
+                _graphics.PreferredBackBufferHeight / 2f);
+
+            _inputManager = new InputManager();
+            
+            _scoreDatabase = new ScoreDatabase();
+            LoadTopScores();
+            
+            _audioManager = new AudioManager();
+            _collisionDetector = new CollisionDetector();
+            _entitySpawner = new EntitySpawner(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            _entityUpdater = new EntityUpdater(_collisionDetector, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            
+            // Note: Player will be fully initialized in LoadContent when texture is available
+            
+            base.Initialize();
+        }
+
+        private void LoadTopScores()
+        {
+            _topScores = _scoreDatabase.GetTopScores(10);
+        }
+
+        protected override void LoadContent()
+        {
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            
+            // Initialize content loader
+            _contentLoader = new ContentLoader(Content, GraphicsDevice);
+            
+            // Load and initialize background animator
+            var bgFrames = _contentLoader.LoadBackgroundFrames();
+            var bgFallback = bgFrames.Count == 0 ? _contentLoader.CreateBackgroundFallback() : null;
+            _backgroundAnimator = new BackgroundAnimator(bgFrames, bgFallback);
+
+            // Load UI pixel
+            _uiPixel = _contentLoader.CreateUIPixel();
+
+            // Load audio assets
+            var (buttonClickSong, mainMenuMusic) = _contentLoader.LoadAudioAssets();
+            _audioManager.Initialize(buttonClickSong, mainMenuMusic);
+
+            // Load textures
+            var playerTexture = _contentLoader.LoadPlayerTexture();
+            _laserTexture = _contentLoader.LoadLaserTexture();
+            _enemyTextures = _contentLoader.LoadEnemyTextures();
+            _asteroidTextures = _contentLoader.LoadAsteroidTextures();
+            _buffTextures = _contentLoader.LoadBuffTextures();
+            _bossTextures = _contentLoader.LoadBossTextures();
+            _scoreFont = _contentLoader.LoadScoreFont();
+
+            // Initialize player with texture
+            Vector2 startPosition = new Vector2(
+                _graphics.PreferredBackBufferWidth / 2f,
+                _graphics.PreferredBackBufferHeight / 2f);
+            _player = new Player(playerTexture, startPosition);
+
+            // Initialize renderers
+            _gameplayRenderer = new GameplayRenderer(_spriteBatch, _scoreFont, _uiPixel);
+            _menuRenderer = new MenuRenderer(_spriteBatch, _scoreFont, _uiPixel, 
+                _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+        }
+
+        private void ToggleFullscreen()
+        {
+            _graphics.IsFullScreen = !_graphics.IsFullScreen;
+            
+            if (_graphics.IsFullScreen)
+            {
+                // Switch to fullscreen - use desktop resolution
+                var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+                _graphics.PreferredBackBufferWidth = displayMode.Width;
+                _graphics.PreferredBackBufferHeight = displayMode.Height;
+            }
+            else
+            {
+                // Switch to windowed mode - use smaller resolution
+                _graphics.PreferredBackBufferWidth = 1000;
+                _graphics.PreferredBackBufferHeight = 900;
+            }
+            
+            _graphics.ApplyChanges();
+        }
+
+        protected override void Update(GameTime gameTime)
+        {
+            // Update input states
+            _inputManager.Update();
+            
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // Global fullscreen toggle (Alt+Enter or F11)
+            if (_inputManager.IsFullscreenToggleJustPressed())
+            {
+                ToggleFullscreen();
+            }
+
+            // Update background animation
+            _backgroundAnimator.Update(dt);
+
+            switch (_state)
+            {
+                case GameState.MainMenu:
+                    UpdateMainMenu();
+                    break;
+                case GameState.UsernameInput:
+                    UpdateUsernameInput(dt);
+                    break;
+                case GameState.Playing:
+                    UpdatePlaying(dt);
+                    break;
+                case GameState.GameOver:
+                    UpdateGameOver();
+                    break;
+                case GameState.Leaderboard:
+                    UpdateLeaderboard();
+                    break;
+            }
+
+            base.Update(gameTime);
+        }
+
+        private void UpdateMainMenu()
+        {
+            // Start main menu music if not already playing
+            _audioManager.EnsureMainMenuMusicPlaying();
+
+            // Gamepad back button check for Xbox controller compatibility
+            if (_inputManager.IsGamePadBackPressed())
+            {
+                Exit();
+            }
+
+            int bw = Math.Min(360, _graphics.PreferredBackBufferWidth - 160);
+            int bh = 64;
+            int x = (_graphics.PreferredBackBufferWidth - bw) / 2;
+            int yStart = (int)(_graphics.PreferredBackBufferHeight * 0.4f);
+            int spacing = 18;
+
+            var startRect = new Rectangle(x, yStart, bw, bh);
+            var leaderboardRect = new Rectangle(x, yStart + bh + spacing, bw, bh);
+            var quitRect = new Rectangle(x, yStart + 2 * (bh + spacing), bw, bh);
+
+            // Check for start game input
+            if (_inputManager.IsConfirmJustPressed() || _inputManager.IsRectangleJustClicked(startRect))
+            {
+                _audioManager.PlayButtonClickSound();
+                _state = GameState.UsernameInput;
+                _playerName = "";
+            }
+            // Check for leaderboard input
+            else if (_inputManager.IsRectangleJustClicked(leaderboardRect) || _inputManager.IsKeyJustPressed(Keys.L))
+            {
+                _audioManager.PlayButtonClickSound();
+                LoadTopScores();
+                _state = GameState.Leaderboard;
+            }
+            // Check for quit input
+            else if (_inputManager.IsRectangleJustClicked(quitRect))
+            {
+                _audioManager.PlayButtonClickSound();
+                Exit();
+            }
+        }
+
+        private void UpdateUsernameInput(float dt)
+        {
+            // Keep main menu music playing during username input
+            _audioManager.EnsureMainMenuMusicPlaying();
+
+            // Cursor blinking
+            _cursorBlinkTimer += dt;
+            if (_cursorBlinkTimer >= GameConstants.CursorBlinkInterval)
+            {
+                _cursorBlinkTimer -= GameConstants.CursorBlinkInterval;
+                _showCursor = !_showCursor;
+            }
+
+            // Handle text input
+            var pressedKeys = _inputManager.GetPressedKeys();
+            foreach (var key in pressedKeys)
+            {
+                if (!_inputManager.PreviousKeyboard.IsKeyDown(key))
+                {
+                    HandleTextInput(key);
+                }
+            }
+
+            // Start game when Enter is pressed (if username is not empty)
+            if (_inputManager.IsKeyJustPressed(Keys.Enter))
+            {
+                if (!string.IsNullOrWhiteSpace(_playerName))
+                {
+                    _audioManager.StopMainMenuMusic();
+                    _state = GameState.Playing;
+                    ResetGame();
+                }
+            }
+
+            // Back to main menu
+            if (_inputManager.IsBackJustPressed())
+            {
+                _state = GameState.MainMenu;
+            }
+        }
+
+        private void UpdateLeaderboard()
+        {
+            // Keep main menu music playing during leaderboard view
+            _audioManager.EnsureMainMenuMusicPlaying();
+
+            if (_inputManager.IsBackJustPressed() ||
+                _inputManager.IsConfirmJustPressed() ||
+                _inputManager.IsLeftMouseButtonJustClicked())
+            {
+                _state = GameState.MainMenu;
+            }
+        }
+
+        private void HandleTextInput(Keys key)
+        {
+            if (_playerName.Length >= GameConstants.MaxUsernameLength) return;
+
+            // Handle letters
+            if (key >= Keys.A && key <= Keys.Z)
+            {
+                char letter = (char)('a' + (key - Keys.A));
+                _playerName += letter;
+            }
+            // Handle numbers
+            else if (key >= Keys.D0 && key <= Keys.D9)
+            {
+                char number = (char)('0' + (key - Keys.D0));
+                _playerName += number;
+            }
+            // Handle space
+            else if (key == Keys.Space && _playerName.Length > 0 && !_playerName.EndsWith(" "))
+            {
+                _playerName += " ";
+            }
+            // Handle backspace
+            else if (key == Keys.Back && _playerName.Length > 0)
+            {
+                _playerName = _playerName[..^1];
+            }
+        }
+
+        private void UpdatePlaying(float dt)
+        {
+            // Ensure menu music is stopped during gameplay
+            _audioManager.EnsureMainMenuMusicStopped();
+
+            if (_player.IsDead)
+            {
+                _state = GameState.GameOver;
+                return;
+            }
+
+            // Escape to return to main menu
+            if (_inputManager.IsBackJustPressed())
+            {
+                _state = GameState.MainMenu;
+                return;
+            }
+
+            // Keep gamepad back button for Xbox controller compatibility
+            if (_inputManager.IsGamePadBackPressed())
+            {
+                _state = GameState.MainMenu;
+                return;
+            }
+
+            _spawnedEnemyThisUpdate = false;
+
+            // Update player (buff timers, cooldowns)
+            _player.Update(dt);
+
+            // Restored time-based scoring
+            _totalPlayTime += dt;
+            double scoreGain = GameConstants.ScorePerSecond * dt;
+            _score += scoreGain;
+            _scoreInt = (int)Math.Round(_score);
+
+            // Player movement
+            Vector2 movementDirection = _inputManager.GetMovementDirection();
+            if (movementDirection.LengthSquared() > 0)
+            {
+                _player.Move(movementDirection, dt);
+            }
+
+            // Keep player within screen bounds
+            _player.ClampToScreen(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+
+            // Player shooting
+            if (_inputManager.IsLeftMouseButtonJustClicked() && _player.CanShoot())
+            {
+                Vector2 targetPos = _inputManager.GetMousePosition();
+                
+                if (_player.HasMultiShotBuff)
+                {
+                    // Fire 3 shots in a spread pattern
+                    Vector2 dir = targetPos - _player.Position;
+                    if (dir.LengthSquared() > 0)
+                        dir.Normalize();
+                    else
+                        dir = _player.Facing;
+                    
+                    float baseAngle = MathF.Atan2(dir.Y, dir.X);
+                    float spreadAngle = MathHelper.ToRadians(GameConstants.MultiShotSpreadAngle);
+                    
+                    for (int i = -1; i <= 1; i++)
+                    {
+                        float angle = baseAngle + (i * spreadAngle);
+                        Vector2 shotDir = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+                        SpawnLaserInDirection(shotDir, false);
+                    }
+                }
+                else
+                {
+                    SpawnLaserTowards(targetPos, false);
+                }
+                
+                _player.ResetShootCooldown();
+            }
+
+            // Enhanced Boss logic: First boss after 10 enemies, then every 20 enemies
+            if (!_bossActive)
+            {
+                if (_entitySpawner.ShouldSpawnBoss(_enemiesDestroyed, _bossesDefeated))
+                {
+                    _bossActive = true;
+                    _currentBossTextureIndex = _entitySpawner.GetBossTextureIndex(_bossesDefeated);
+                    
+                    var (position, horizontalDir) = _entitySpawner.SpawnBoss(_currentBossTextureIndex);
+                    _bossPosition = position;
+                    _bossHorizontalDir = horizontalDir;
+                    _bossHp = GameConstants.BossMaxHp;
+                    _bossMovementTimer = 0f;
+                }
+            }
+
+            if (_bossActive)
+            {
+                UpdateBoss(dt);
+            }
+
+            // Only spawn enemies and asteroids if boss is not active
+            if (!_bossActive)
+            {
+                // Enemy spawn - back to score-based difficulty scaling
+                float enemyInterval = _entitySpawner.CalculateEnemySpawnInterval(_scoreInt);
+                _enemySpawnTimer += dt;
+                if (_enemySpawnTimer >= enemyInterval && !_spawnedEnemyThisUpdate)
+                {
+                    _enemySpawnTimer -= enemyInterval;
+                    _enemies.Add(_entitySpawner.SpawnEnemy(_enemyTextures, _scoreInt, _totalPlayTime));
+                    _spawnedEnemyThisUpdate = true;
+                }
+
+                // Asteroid spawn - back to score-based calculation
+                float asteroidInterval = _entitySpawner.CalculateAsteroidSpawnInterval(_scoreInt);
+                _asteroidSpawnTimer += dt;
+                if (_asteroidSpawnTimer >= asteroidInterval)
+                {
+                    _asteroidSpawnTimer -= asteroidInterval;
+                    _asteroids.Add(_entitySpawner.SpawnAsteroid(_asteroidTextures));
+                }
+            }
+
+            UpdateEnemies(dt);
+            UpdateAsteroids(dt);
+            UpdateLasers(dt);
+            UpdateBuffPickups(dt);
+        }
+
+        private void UpdateBuffPickups(float dt)
+        {
+            _entityUpdater.UpdateBuffPickups(
+                _buffPickups,
+                dt,
+                _player.Position,
+                _player.ApplyBuff);
+        }
+
+        private void SpawnBuffDrop(Vector2 position)
+        {
+            var buff = _entitySpawner.TrySpawnBuffDrop(position);
+            if (buff.HasValue)
+            {
+                _buffPickups.Add(buff.Value);
+            }
+        }
+
+        private void SpawnLaserInDirection(Vector2 direction, bool isEnemy, Vector2? origin = null)
+        {
+            Vector2 src = origin ?? _player.Position;
+            var laser = _entitySpawner.SpawnLaserInDirection(
+                src, direction, _player.Facing, isEnemy, _player.Speed, _laserSpeedMultiplier, _player.Texture.Height);
+            _lasers.Add(laser);
+        }
+
+        private void SpawnLaserTowards(Vector2 target, bool isEnemy, Vector2? origin = null)
+        {
+            Vector2 src = origin ?? _player.Position;
+            var laser = _entitySpawner.SpawnLaserTowards(
+                src, target, _player.Facing, isEnemy, _player.Speed, _laserSpeedMultiplier, _player.Texture.Height);
+            _lasers.Add(laser);
+        }
+
+        private void UpdateGameOver()
+        {
+            // Get the main menu button area
+            int buttonWidth = Math.Min(300, _graphics.PreferredBackBufferWidth - 160);
+            int buttonHeight = 60;
+            int x = (_graphics.PreferredBackBufferWidth - buttonWidth) / 2;
+            int y = (int)(_graphics.PreferredBackBufferHeight * 0.7f);
+            var mainMenuRect = new Rectangle(x, y, buttonWidth, buttonHeight);
+            
+            // Return to main menu if the main menu button is clicked
+            if (_inputManager.IsRectangleJustClicked(mainMenuRect))
+            {
+                LoadTopScores();
+                _state = GameState.MainMenu;
+            }
+        }
+
+        private void UpdateEnemies(float dt)
+        {
+            int shieldCharges = _player.ShieldCharges;
+            _entityUpdater.UpdateEnemies(
+                _enemies,
+                _enemyTextures,
+                dt,
+                _scoreInt,
+                _totalPlayTime,
+                _player.Position,
+                _player.Texture,
+                (enemyPos) => SpawnLaserTowards(_player.Position, true, enemyPos),
+                (damage) => { _player.TakeDamage(damage); },
+                () => { _scoreDatabase.SaveScore(_playerName, _scoreInt); },
+                ref shieldCharges);
+            // Note: Shield charges are modified by reference in EntityUpdater, 
+            // but Player.TakeDamage also modifies them, so we sync back
+        }
+
+        private void UpdateAsteroids(float dt)
+        {
+            int shieldCharges = _player.ShieldCharges;
+            _entityUpdater.UpdateAsteroids(
+                _asteroids,
+                dt,
+                _player.Position,
+                _player.Texture,
+                (damage) => { _player.TakeDamage(damage); },
+                () => { _scoreDatabase.SaveScore(_playerName, _scoreInt); },
+                ref shieldCharges);
+        }
+
+        private void FireBossShot()
+        {
+            var laser = _entitySpawner.SpawnBossLaser(
+                _bossPosition, 
+                _player.Position, 
+                _player.Speed, 
+                _laserSpeedMultiplier,
+                _bossTextures[_currentBossTextureIndex].Height);
+            _lasers.Add(laser);
+        }
+
+        private void UpdateBoss(float dt)
+        {
+            int shieldCharges = _player.ShieldCharges;
+            _entityUpdater.UpdateBoss(
+                ref _bossPosition,
+                ref _bossMovementTimer,
+                ref _bossHorizontalDir,
+                _bossHorizontalSpeed,
+                _bossTextures[_currentBossTextureIndex],
+                dt,
+                _player.Position,
+                _player.Texture,
+                _bossActive,
+                (damage) => { _player.TakeDamage(damage); },
+                () => { _scoreDatabase.SaveScore(_playerName, _scoreInt); },
+                ref shieldCharges);
+
+            UpdateBossShooting(dt);
+        }
+
+        private void UpdateBossShooting(float dt)
+        {
+            _entityUpdater.UpdateBossShooting(
+                ref _bossShootTimer,
+                ref _bossShotsFired,
+                ref _bossBurstTimer,
+                ref _bossIsBursting,
+                dt,
+                FireBossShot);
+        }
+
+        private void UpdateLasers(float dt)
+        {
+            int shieldCharges = _player.ShieldCharges;
+            _entityUpdater.UpdateLasers(
+                _lasers,
+                _laserTexture,
+                dt,
+                _bossActive,
+                _bossPosition,
+                _bossTextures[_currentBossTextureIndex],
+                ref _bossHp,
+                ref _bossActive,
+                ref _bossesDefeated,
+                ref _enemiesDestroyed,
+                SpawnBuffDrop,
+                _enemies,
+                _enemyTextures,
+                _asteroids,
+                _player.Position,
+                _player.Texture,
+                (damage) => { _player.TakeDamage(damage); },
+                () => { _scoreDatabase.SaveScore(_playerName, _scoreInt); },
+                ref shieldCharges,
+                IsOffScreen);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(XnaColor.Black);
+            _spriteBatch.Begin();
+
+            // Draw animated background
+            var backgroundRect = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            _backgroundAnimator.Draw(_spriteBatch, backgroundRect);
+
+            switch (_state)
+            {
+                case GameState.MainMenu:
+                    DrawMainMenu();
+                    break;
+                case GameState.UsernameInput:
+                    DrawUsernameInput();
+                    break;
+                case GameState.Playing:
+                    DrawPlaying();
+                    break;
+                case GameState.GameOver:
+                    DrawGameOver();
+                    break;
+                case GameState.Leaderboard:
+                    DrawLeaderboard();
+                    break;
+            }
+
+            _spriteBatch.End();
+            base.Draw(gameTime);
+        }
+
+        private void DrawMainMenu()
+        {
+            _menuRenderer.DrawMainMenu(_inputManager.CurrentMouse);
+        }
+
+        private void DrawLeaderboard()
+        {
+            _menuRenderer.DrawLeaderboard(_topScores);
+        }
+
+        private void DrawUsernameInput()
+        {
+            _menuRenderer.DrawUsernameInput(_playerName, _showCursor);
+        }
+
+        private void DrawPlaying()
+        {
+            _gameplayRenderer.DrawPlaying(
+                _asteroids,
+                _enemyTextures,
+                _enemies,
+                _buffTextures,
+                _buffPickups,
+                _laserTexture,
+                _lasers,
+                _player.Texture,
+                _player.Position,
+                _player.ShieldCharges,
+                _totalPlayTime,
+                _bossTextures,
+                _bossActive,
+                _currentBossTextureIndex,
+                _bossPosition,
+                _graphics.PreferredBackBufferWidth,
+                _scoreInt,
+                _player.Health,
+                _playerName,
+                _bossHp,
+                _player.SpeedBuffTimer,
+                _player.FireRateBuffTimer,
+                _player.MultiShotBuffTimer);
+        }
+
+        private void DrawBuffIcon(BuffType type, Vector2 position, float timeRemaining)
+        {
+            // This method is now handled by GameplayRenderer
+            // Keeping stub for backward compatibility if needed
+        }
+
+        private void DrawGameOver()
+        {
+            DrawPlaying(); // Draw the game state behind
+            _menuRenderer.DrawGameOver(_scoreInt, _playerName, _inputManager.CurrentMouse);
+        }
+
+        private bool IsOffScreen(Vector2 pos)
+        {
+            int w = _graphics.PreferredBackBufferWidth;
+            int h = _graphics.PreferredBackBufferHeight;
+            int margin = GameConstants.LaserOffScreenMargin;
+            return pos.X < -margin || pos.X > w + margin || pos.Y < -margin || pos.Y > h + margin;
+        }
+
+        private void ResetGame()
+        {
+            _enemies.Clear();
+            _asteroids.Clear();
+            _lasers.Clear();
+            _buffPickups.Clear();
+
+            // Reset player
+            Vector2 startPosition = new Vector2(
+                _graphics.PreferredBackBufferWidth / 2f, 
+                _graphics.PreferredBackBufferHeight / 2f);
+            _player.Reset(startPosition);
+
+            _enemiesDestroyed = 0;
+            _score =  0.0;
+            _scoreInt = 0;
+            _totalPlayTime = 0f;
+
+            _enemySpawnTimer = 0f;
+            _asteroidSpawnTimer = 0f;
+
+            // Reset boss variables
+            _bossActive = false;
+            _bossesDefeated = 0;
+            _currentBossTextureIndex = 0;
+            _bossHp = GameConstants.BossMaxHp;
+            _bossMovementTimer = 0f;
+
+            // Reset boss shooting variables
+            _bossShootTimer = 0f;
+            _bossShotsFired = 0;
+            _bossBurstTimer = 0f;
+            _bossIsBursting = false;
+
+            // Reset background animation
+            _backgroundAnimator.Reset();
+        }
+    }
+}

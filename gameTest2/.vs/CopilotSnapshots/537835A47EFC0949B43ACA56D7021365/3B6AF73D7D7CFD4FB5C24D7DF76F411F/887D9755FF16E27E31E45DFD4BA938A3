@@ -1,0 +1,205 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
+using XnaColor = Microsoft.Xna.Framework.Color;
+using gameTest2.Models;
+using gameTest2.Config;
+using gameTest2.Systems;
+using gameTest2.Rendering;
+using gameTest2.States;
+
+namespace gameTest2
+{
+    public class Game1 : Game
+    {
+        private GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
+
+        // Core Systems
+        private AudioManager _audioManager;
+        private CollisionDetector _collisionDetector;
+        private EntitySpawner _entitySpawner;
+        private EntityUpdater _entityUpdater;
+        private ContentLoader _contentLoader;
+        private InputManager _inputManager;
+        private BackgroundAnimator _backgroundAnimator;
+        private GameStateManager _stateManager;
+        
+        // Rendering
+        private GameplayRenderer _gameplayRenderer;
+        private MenuRenderer _menuRenderer;
+
+        // Shared Game Data (used by states)
+        private Player _player;
+        private readonly List<Laser> _lasers = new();
+        private readonly List<Enemy> _enemies = new();
+        private readonly List<Asteroid> _asteroids = new();
+        private readonly List<BuffPickup> _buffPickups = new();
+        
+        // Textures (shared across states)
+        private Texture2D _laserTexture;
+        private Texture2D[] _enemyTextures = new Texture2D[GameConstants.EnemyTextureCount];
+        private Texture2D[] _asteroidTextures = new Texture2D[GameConstants.AsteroidTextureCount];
+        private Texture2D[] _buffTextures = new Texture2D[5];
+        private Texture2D[] _bossTextures = new Texture2D[GameConstants.BossTextureCount];
+        
+        private float _laserSpeedMultiplier = GameConstants.LaserSpeedMultiplier;
+        private Texture2D _uiPixel;
+        private SpriteFont _scoreFont;
+
+        // Database
+        private ScoreDatabase _scoreDatabase;
+        private List<ScoreEntry> _topScores = new();
+
+        public Game1()
+        {
+            _graphics = new GraphicsDeviceManager(this);
+            
+            // Set fullscreen mode
+            _graphics.IsFullScreen = true;
+            
+            // Optional: Set preferred resolution for fullscreen (uses desktop resolution by default)
+            // _graphics.PreferredBackBufferWidth = 1920;
+            // _graphics.PreferredBackBufferHeight = 1080;
+            
+            // If you want to use desktop resolution, get it from GraphicsAdapter
+            var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+            _graphics.PreferredBackBufferWidth = displayMode.Width;
+            _graphics.PreferredBackBufferHeight = displayMode.Height;
+            
+            _graphics.ApplyChanges();
+            Content.RootDirectory = "Content";
+            IsMouseVisible = true;
+        }
+
+        protected override void Initialize()
+        {
+            Vector2 startPosition = new Vector2(
+                _graphics.PreferredBackBufferWidth / 2f,
+                _graphics.PreferredBackBufferHeight / 2f);
+
+            _inputManager = new InputManager();
+            
+            _scoreDatabase = new ScoreDatabase();
+            LoadTopScores();
+            
+            _audioManager = new AudioManager();
+            _collisionDetector = new CollisionDetector();
+            _entitySpawner = new EntitySpawner(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            _entityUpdater = new EntityUpdater(_collisionDetector, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            
+            // Note: Player will be fully initialized in LoadContent when texture is available
+            
+            base.Initialize();
+        }
+
+        private void LoadTopScores()
+        {
+            _topScores = _scoreDatabase.GetTopScores(10);
+        }
+
+        protected override void LoadContent()
+        {
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            
+            // Initialize content loader
+            _contentLoader = new ContentLoader(Content, GraphicsDevice);
+            
+            // Load and initialize background animator
+            var bgFrames = _contentLoader.LoadBackgroundFrames();
+            var bgFallback = bgFrames.Count == 0 ? _contentLoader.CreateBackgroundFallback() : null;
+            _backgroundAnimator = new BackgroundAnimator(bgFrames, bgFallback);
+
+            // Load UI pixel
+            _uiPixel = _contentLoader.CreateUIPixel();
+
+            // Load audio assets
+            var (buttonClickSong, mainMenuMusic) = _contentLoader.LoadAudioAssets();
+            _audioManager.Initialize(buttonClickSong, mainMenuMusic);
+
+            // Load textures
+            var playerTexture = _contentLoader.LoadPlayerTexture();
+            _laserTexture = _contentLoader.LoadLaserTexture();
+            _enemyTextures = _contentLoader.LoadEnemyTextures();
+            _asteroidTextures = _contentLoader.LoadAsteroidTextures();
+            _buffTextures = _contentLoader.LoadBuffTextures();
+            _bossTextures = _contentLoader.LoadBossTextures();
+            _scoreFont = _contentLoader.LoadScoreFont();
+
+            // Initialize player with texture
+            Vector2 startPosition = new Vector2(
+                _graphics.PreferredBackBufferWidth / 2f,
+                _graphics.PreferredBackBufferHeight / 2f);
+            _player = new Player(playerTexture, startPosition);
+
+            // Initialize renderers
+            _gameplayRenderer = new GameplayRenderer(_spriteBatch, _scoreFont, _uiPixel);
+            _menuRenderer = new MenuRenderer(_spriteBatch, _scoreFont, _uiPixel, 
+                _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+        }
+
+        private void ToggleFullscreen()
+        {
+            _graphics.IsFullScreen = !_graphics.IsFullScreen;
+            
+            if (_graphics.IsFullScreen)
+            {
+                // Switch to fullscreen - use desktop resolution
+                var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+                _graphics.PreferredBackBufferWidth = displayMode.Width;
+                _graphics.PreferredBackBufferHeight = displayMode.Height;
+            }
+            else
+            {
+                // Switch to windowed mode - use smaller resolution
+                _graphics.PreferredBackBufferWidth = 1000;
+                _graphics.PreferredBackBufferHeight = 900;
+            }
+            
+            _graphics.ApplyChanges();
+        }
+
+        protected override void Update(GameTime gameTime)
+        {
+            // Update input states
+            _inputManager.Update();
+            
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // Global fullscreen toggle (Alt+Enter or F11)
+            if (_inputManager.IsFullscreenToggleJustPressed())
+            {
+                ToggleFullscreen();
+            }
+
+            // Update background animation
+            _backgroundAnimator.Update(dt);
+
+            // Update the current game state
+            _stateManager.UpdateCurrentState(_inputManager, dt, ref _player, _laserSpeedMultiplier, _enemies, _asteroids, _buffPickups, _lasers, _bossTextures, ref _bossActive, ref _currentBossTextureIndex, ref _bossPosition, ref _bossHp, ref _bossMovementTimer, ref _bossHorizontalDir, ref _bossShootTimer, ref _bossShotsFired, ref _bossBurstTimer, ref _bossIsBursting, ref _totalPlayTime, ref _score, ref _scoreInt, ref _enemiesDestroyed, _scoreDatabase, _audioManager, _graphics, _uiPixel, _menuRenderer, _gameplayRenderer);
+
+            base.Update(gameTime);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(XnaColor.Black);
+            _spriteBatch.Begin();
+
+            // Draw animated background
+            var backgroundRect = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            _backgroundAnimator.Draw(_spriteBatch, backgroundRect);
+
+            // Draw the current game state
+            _stateManager.DrawCurrentState(_spriteBatch, _topScores, _player, _uiPixel, _gameplayRenderer, _menuRenderer, _laserTexture, _lasers, _enemyTextures, _enemies, _buffTextures, _buffPickups, _asteroidTextures, _asteroids, _bossTextures, _currentBossTextureIndex, _bossActive, _bossPosition, _bossHp, _scoreInt, _player.Name);
+
+            _spriteBatch.End();
+            base.Draw(gameTime);
+        }
+    }
+}

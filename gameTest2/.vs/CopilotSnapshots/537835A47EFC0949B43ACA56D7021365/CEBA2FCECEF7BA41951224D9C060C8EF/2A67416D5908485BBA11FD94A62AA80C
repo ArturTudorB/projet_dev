@@ -1,0 +1,283 @@
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using XnaColor = Microsoft.Xna.Framework.Color;
+using System;
+using System.Collections.Generic;
+
+namespace gameTest2.Rendering
+{
+    /// <summary>
+    /// Handles rendering for all menu states (Main Menu, Username Input, Leaderboard, Game Over).
+    /// Provides consistent UI rendering across different game states.
+    /// </summary>
+    public class MenuRenderer
+    {
+        private readonly SpriteBatch _spriteBatch;
+        private readonly SpriteFont _font;
+        private readonly Texture2D _uiPixel;
+        private readonly int _screenWidth;
+        private readonly int _screenHeight;
+
+        public MenuRenderer(SpriteBatch spriteBatch, SpriteFont font, Texture2D uiPixel, int screenWidth, int screenHeight)
+        {
+            _spriteBatch = spriteBatch;
+            _font = font;
+            _uiPixel = uiPixel;
+            _screenWidth = screenWidth;
+            _screenHeight = screenHeight;
+        }
+
+        /// <summary>
+        /// Draws the main menu with start, leaderboard, and quit buttons.
+        /// </summary>
+        public void DrawMainMenu(MouseState mouse)
+        {
+            // Darken background
+            var overlay = new Rectangle(0, 0, _screenWidth, _screenHeight);
+            _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 160));
+
+            // Get button layouts
+            GetMenuLayout(out var startRect, out var leaderboardRect, out var quitRect);
+
+            // Check hover states
+            bool hoverStart = startRect.Contains(mouse.Position);
+            bool hoverLeaderboard = leaderboardRect.Contains(mouse.Position);
+            bool hoverQuit = quitRect.Contains(mouse.Position);
+
+            // Button colors with hover effects
+            var startColor = hoverStart ? XnaColor.Lerp(XnaColor.DodgerBlue, XnaColor.White, 0.25f) : XnaColor.DodgerBlue;
+            var leaderboardColor = hoverLeaderboard ? XnaColor.Lerp(XnaColor.Orange, XnaColor.White, 0.25f) : XnaColor.Orange;
+            var quitColor = hoverQuit ? XnaColor.Lerp(XnaColor.DimGray, XnaColor.White, 0.25f) : XnaColor.DimGray;
+
+            // Draw buttons
+            _spriteBatch.Draw(_uiPixel, startRect, startColor);
+            _spriteBatch.Draw(_uiPixel, leaderboardRect, leaderboardColor);
+            _spriteBatch.Draw(_uiPixel, quitRect, quitColor);
+
+            if (_font == null) return;
+
+            // Draw title
+            string title = "Menu Principal";
+            var tSize = _font.MeasureString(title);
+            var tPos = new Vector2((_screenWidth - tSize.X) / 2f, _screenHeight * 0.15f);
+            _spriteBatch.DrawString(_font, title, tPos, XnaColor.White);
+
+            // Draw button labels
+            DrawButtonLabel("Démarrer", startRect);
+            DrawButtonLabel("Classement", leaderboardRect);
+            DrawButtonLabel("Quitter", quitRect);
+
+            // Draw hint text
+            string hint = "Entrée/Espace: Démarrer | L: Classement | F11/Alt+Enter: Plein écran";
+            var hSize = _font.MeasureString(hint);
+            var hPos = new Vector2((_screenWidth - hSize.X) / 2f, quitRect.Bottom + 24);
+            _spriteBatch.DrawString(_font, hint, hPos, XnaColor.LightGray);
+        }
+
+        /// <summary>
+        /// Draws the username input screen.
+        /// </summary>
+        public void DrawUsernameInput(string playerName, bool showCursor)
+        {
+            // Darken background
+            var overlay = new Rectangle(0, 0, _screenWidth, _screenHeight);
+            _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 180));
+
+            if (_font == null) return;
+
+            // Draw title
+            string title = "Entrez votre nom";
+            var titleSize = _font.MeasureString(title);
+            var titlePos = new Vector2((_screenWidth - titleSize.X) / 2f, _screenHeight * 0.3f);
+            _spriteBatch.DrawString(_font, title, titlePos, XnaColor.White);
+
+            // Draw input field
+            int inputWidth = 400;
+            int inputHeight = 50;
+            var inputRect = new Rectangle(
+                (_screenWidth - inputWidth) / 2,
+                (int)(titlePos.Y + titleSize.Y + 40),
+                inputWidth,
+                inputHeight);
+
+            _spriteBatch.Draw(_uiPixel, inputRect, XnaColor.White);
+            _spriteBatch.Draw(_uiPixel, new Rectangle(inputRect.X + 2, inputRect.Y + 2, inputRect.Width - 4, inputRect.Height - 4), XnaColor.Black);
+
+            // Draw entered text with cursor
+            string displayText = playerName + (showCursor ? "|" : "");
+            var textSize = _font.MeasureString(displayText);
+            var textPos = new Vector2(inputRect.X + 10, inputRect.Y + (inputRect.Height - textSize.Y) / 2f);
+            _spriteBatch.DrawString(_font, displayText, textPos, XnaColor.White);
+
+            // Draw instructions
+            string instruction = "Tapez votre nom et appuyez sur Entrée pour commencer";
+            var instrSize = _font.MeasureString(instruction);
+            var instrPos = new Vector2((_screenWidth - instrSize.X) / 2f, inputRect.Bottom + 30);
+            _spriteBatch.DrawString(_font, instruction, instrPos, XnaColor.LightGray);
+
+            string backInstruction = "Échap pour retourner au menu";
+            var backSize = _font.MeasureString(backInstruction);
+            var backPos = new Vector2((_screenWidth - backSize.X) / 2f, instrPos.Y + instrSize.Y + 10);
+            _spriteBatch.DrawString(_font, backInstruction, backPos, XnaColor.Gray);
+        }
+
+        /// <summary>
+        /// Draws the leaderboard screen with top scores.
+        /// </summary>
+        public void DrawLeaderboard(List<ScoreEntry> topScores)
+        {
+            // Darken background
+            var overlay = new Rectangle(0, 0, _screenWidth, _screenHeight);
+            _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 180));
+
+            if (_font == null) return;
+
+            // Draw title
+            string title = "Meilleurs Scores";
+            var titleSize = _font.MeasureString(title);
+            var titlePos = new Vector2((_screenWidth - titleSize.X) / 2f, _screenHeight * 0.15f);
+            _spriteBatch.DrawString(_font, title, titlePos, XnaColor.White);
+
+            // Draw headers
+            float startY = titlePos.Y + titleSize.Y + 40f;
+            float rankX = _screenWidth * 0.15f;
+            float nameX = _screenWidth * 0.3f;
+            float scoreX = _screenWidth * 0.55f;
+            float dateX = _screenWidth * 0.75f;
+
+            _spriteBatch.DrawString(_font, "Rang", new Vector2(rankX, startY), XnaColor.Yellow);
+            _spriteBatch.DrawString(_font, "Nom", new Vector2(nameX, startY), XnaColor.Yellow);
+            _spriteBatch.DrawString(_font, "Score", new Vector2(scoreX, startY), XnaColor.Yellow);
+            _spriteBatch.DrawString(_font, "Date", new Vector2(dateX, startY), XnaColor.Yellow);
+
+            // Draw separator line
+            float lineY = startY + 30f;
+            var lineRect = new Rectangle((int)rankX, (int)lineY, (int)(dateX + 100 - rankX), 2);
+            _spriteBatch.Draw(_uiPixel, lineRect, XnaColor.Gray);
+
+            // Draw scores
+            float currentY = lineY + 20f;
+            for (int i = 0; i < Math.Min(topScores.Count, 10); i++)
+            {
+                var score = topScores[i];
+
+                // Determine row color
+                var rowColor = i % 2 == 0 ? XnaColor.White : XnaColor.LightGray;
+
+                // Highlight top 3
+                if (i == 0) rowColor = XnaColor.Gold;
+                else if (i == 1) rowColor = XnaColor.Silver;
+                else if (i == 2) rowColor = XnaColor.FromNonPremultiplied(205, 127, 50, 255); // Bronze
+
+                string rank = $"{i + 1}.";
+                string name = score.PlayerName.Length > 15 ? score.PlayerName[..15] + "..." : score.PlayerName;
+                string scoreText = $"{score.Score:N0}";
+                string date = score.DateAchieved.ToString("dd/MM/yy");
+
+                _spriteBatch.DrawString(_font, rank, new Vector2(rankX, currentY), rowColor);
+                _spriteBatch.DrawString(_font, name, new Vector2(nameX, currentY), rowColor);
+                _spriteBatch.DrawString(_font, scoreText, new Vector2(scoreX, currentY), rowColor);
+                _spriteBatch.DrawString(_font, date, new Vector2(dateX, currentY), rowColor);
+
+                currentY += 35f;
+            }
+
+            // Empty leaderboard message
+            if (topScores.Count == 0)
+            {
+                string emptyMessage = "Aucun score enregistré";
+                var emptySize = _font.MeasureString(emptyMessage);
+                var emptyPos = new Vector2((_screenWidth - emptySize.X) / 2f, currentY + 40f);
+                _spriteBatch.DrawString(_font, emptyMessage, emptyPos, XnaColor.Gray);
+            }
+
+            // Draw instructions
+            string instruction = "Appuyez sur n'importe quelle touche pour retourner au menu";
+            var instrSize = _font.MeasureString(instruction);
+            var instrPos = new Vector2((_screenWidth - instrSize.X) / 2f, _screenHeight * 0.85f);
+            _spriteBatch.DrawString(_font, instruction, instrPos, XnaColor.LightGray);
+        }
+
+        /// <summary>
+        /// Draws the game over screen with final score and return button.
+        /// </summary>
+        public void DrawGameOver(int finalScore, string playerName, MouseState mouse)
+        {
+            // Darken background
+            var overlay = new Rectangle(0, 0, _screenWidth, _screenHeight);
+            _spriteBatch.Draw(_uiPixel, overlay, new XnaColor(0, 0, 0, 160));
+
+            if (_font == null) return;
+
+            // Prepare text
+            string over = "Game Over";
+            string scoreText = $"Score Final: {finalScore}";
+            string playerText = $"Joueur: {playerName}";
+            string savedText = "Score sauvegardé!";
+
+            // Measure text
+            var oSize = _font.MeasureString(over);
+            var sSize = _font.MeasureString(scoreText);
+            var pSize = _font.MeasureString(playerText);
+            var savedSize = _font.MeasureString(savedText);
+
+            // Calculate positions
+            float startY = _screenHeight * 0.3f;
+            var oPos = new Vector2((_screenWidth - oSize.X) / 2f, startY);
+            var sPos = new Vector2((_screenWidth - sSize.X) / 2f, oPos.Y + oSize.Y + 20f);
+            var pPos = new Vector2((_screenWidth - pSize.X) / 2f, sPos.Y + sSize.Y + 10f);
+            var savedPos = new Vector2((_screenWidth - savedSize.X) / 2f, pPos.Y + pSize.Y + 10f);
+
+            // Draw text
+            _spriteBatch.DrawString(_font, over, oPos, XnaColor.White);
+            _spriteBatch.DrawString(_font, scoreText, sPos, XnaColor.Yellow);
+            _spriteBatch.DrawString(_font, playerText, pPos, XnaColor.Cyan);
+            _spriteBatch.DrawString(_font, savedText, savedPos, XnaColor.LightGreen);
+
+            // Draw main menu button
+            GetGameOverLayout(out var mainMenuRect);
+            bool hoverMainMenu = mainMenuRect.Contains(mouse.Position);
+
+            var buttonColor = hoverMainMenu ? XnaColor.Lerp(XnaColor.DodgerBlue, XnaColor.White, 0.25f) : XnaColor.DodgerBlue;
+            _spriteBatch.Draw(_uiPixel, mainMenuRect, buttonColor);
+
+            // Draw button text
+            DrawButtonLabel("Menu Principal", mainMenuRect);
+        }
+
+        private void DrawButtonLabel(string text, Rectangle buttonRect)
+        {
+            if (_font == null) return;
+
+            var textSize = _font.MeasureString(text);
+            var textPos = new Vector2(
+                buttonRect.X + (buttonRect.Width - textSize.X) / 2f,
+                buttonRect.Y + (buttonRect.Height - textSize.Y) / 2f);
+            _spriteBatch.DrawString(_font, text, textPos, XnaColor.White);
+        }
+
+        private void GetMenuLayout(out Rectangle startRect, out Rectangle leaderboardRect, out Rectangle quitRect)
+        {
+            int bw = Math.Min(360, _screenWidth - 160);
+            int bh = 64;
+            int x = (_screenWidth - bw) / 2;
+            int yStart = (int)(_screenHeight * 0.4f);
+            int spacing = 18;
+
+            startRect = new Rectangle(x, yStart, bw, bh);
+            leaderboardRect = new Rectangle(x, yStart + bh + spacing, bw, bh);
+            quitRect = new Rectangle(x, yStart + 2 * (bh + spacing), bw, bh);
+        }
+
+        private void GetGameOverLayout(out Rectangle mainMenuRect)
+        {
+            int buttonWidth = Math.Min(300, _screenWidth - 160);
+            int buttonHeight = 60;
+            int x = (_screenWidth - buttonWidth) / 2;
+            int y = (int)(_screenHeight * 0.7f);
+
+            mainMenuRect = new Rectangle(x, y, buttonWidth, buttonHeight);
+        }
+    }
+}

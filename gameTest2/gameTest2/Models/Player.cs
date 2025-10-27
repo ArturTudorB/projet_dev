@@ -1,0 +1,208 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using gameTest2.Config;
+
+namespace gameTest2.Models
+{
+    /// <summary>
+    /// Represents the player character with all associated state and behavior.
+    /// Encapsulates player movement, shooting, health, buffs, and positioning.
+    /// </summary>
+    public class Player
+    {
+        // Basic properties
+        public Vector2 Position { get; set; }
+        public Vector2 Facing { get; set; }
+        public Texture2D Texture { get; private set; }
+        public float Speed { get; private set; }
+        
+        // Health and state
+        public int Health { get; private set; }
+        public bool IsDead => Health <= 0;
+        
+        // Shooting
+        public float ShootCooldownTimer { get; private set; }
+        
+        // Active buffs
+        public float SpeedBuffTimer { get; private set; }
+        public float FireRateBuffTimer { get; private set; }
+        public float MultiShotBuffTimer { get; private set; }
+        public int ShieldCharges { get; private set; }
+        
+        // Buff status queries
+        public bool HasSpeedBuff => SpeedBuffTimer > 0f;
+        public bool HasFireRateBuff => FireRateBuffTimer > 0f;
+        public bool HasMultiShotBuff => MultiShotBuffTimer > 0f;
+        public bool HasShield => ShieldCharges > 0;
+        
+        /// <summary>
+        /// Gets the current effective speed considering active buffs.
+        /// </summary>
+        public float CurrentSpeed => HasSpeedBuff ? Speed * GameConstants.SpeedBuffMultiplier : Speed;
+        
+        /// <summary>
+        /// Gets the current shoot cooldown considering active buffs.
+        /// </summary>
+        public float CurrentShootCooldown => HasFireRateBuff 
+            ? GameConstants.ShootCooldownSeconds * GameConstants.FireRateBuffMultiplier 
+            : GameConstants.ShootCooldownSeconds;
+        
+        /// <summary>
+        /// Initializes a new player at the specified position.
+        /// </summary>
+        /// <param name="texture">Player texture</param>
+        /// <param name="startPosition">Starting position</param>
+        public Player(Texture2D texture, Vector2 startPosition)
+        {
+            Texture = texture;
+            Position = startPosition;
+            Facing = new Vector2(0, -1); // Default facing up
+            Speed = GameConstants.PlayerSpeed;
+            Health = GameConstants.PlayerStartingHp;
+            ShootCooldownTimer = 0f;
+            
+            // Initialize buff timers
+            SpeedBuffTimer = 0f;
+            FireRateBuffTimer = 0f;
+            MultiShotBuffTimer = 0f;
+            ShieldCharges = 0;
+        }
+        
+        /// <summary>
+        /// Updates the player state including buff timers and cooldowns.
+        /// </summary>
+        /// <param name="deltaTime">Time elapsed since last update</param>
+        public void Update(float deltaTime)
+        {
+            // Update buff timers
+            if (SpeedBuffTimer > 0f) SpeedBuffTimer -= deltaTime;
+            if (FireRateBuffTimer > 0f) FireRateBuffTimer -= deltaTime;
+            if (MultiShotBuffTimer > 0f) MultiShotBuffTimer -= deltaTime;
+            
+            // Update shoot cooldown
+            if (ShootCooldownTimer > 0f) ShootCooldownTimer -= deltaTime;
+        }
+        
+        /// <summary>
+        /// Moves the player in the specified direction.
+        /// </summary>
+        /// <param name="direction">Normalized movement direction</param>
+        /// <param name="deltaTime">Time elapsed</param>
+        public void Move(Vector2 direction, float deltaTime)
+        {
+            if (direction.LengthSquared() > 0)
+            {
+                Vector2 movement = direction * CurrentSpeed * deltaTime;
+                Position += movement;
+                Facing = direction;
+            }
+        }
+        
+        /// <summary>
+        /// Clamps the player position within screen bounds.
+        /// </summary>
+        /// <param name="screenWidth">Width of the screen</param>
+        /// <param name="screenHeight">Height of the screen</param>
+        public void ClampToScreen(int screenWidth, int screenHeight)
+        {
+            float halfWidth = Texture.Width / 2f;
+            float halfHeight = Texture.Height / 2f;
+            
+            Position = new Vector2(
+                MathHelper.Clamp(Position.X, halfWidth, screenWidth - halfWidth),
+                MathHelper.Clamp(Position.Y, halfHeight, screenHeight - halfHeight)
+            );
+        }
+        
+        /// <summary>
+        /// Checks if the player can shoot (cooldown expired).
+        /// </summary>
+        public bool CanShoot()
+        {
+            return ShootCooldownTimer <= 0f;
+        }
+        
+        /// <summary>
+        /// Resets the shoot cooldown after firing.
+        /// </summary>
+        public void ResetShootCooldown()
+        {
+            ShootCooldownTimer = CurrentShootCooldown;
+        }
+        
+        /// <summary>
+        /// Applies damage to the player, considering shield charges.
+        /// </summary>
+        /// <param name="damage">Amount of damage to apply</param>
+        /// <returns>True if damage was absorbed by shield, false if health was reduced</returns>
+        public bool TakeDamage(int damage)
+        {
+            if (ShieldCharges > 0)
+            {
+                ShieldCharges--;
+                return true; // Damage absorbed by shield
+            }
+            
+            Health -= damage;
+            if (Health < 0) Health = 0;
+            return false; // Health was reduced
+        }
+        
+        /// <summary>
+        /// Applies a buff to the player.
+        /// </summary>
+        /// <param name="buffType">Type of buff to apply</param>
+        public void ApplyBuff(BuffType buffType)
+        {
+            switch (buffType)
+            {
+                case BuffType.Speed:
+                    SpeedBuffTimer = GameConstants.BuffDuration;
+                    break;
+                case BuffType.FireRate:
+                    FireRateBuffTimer = GameConstants.BuffDuration;
+                    break;
+                case BuffType.MultiShot:
+                    MultiShotBuffTimer = GameConstants.BuffDuration;
+                    break;
+                case BuffType.Shield:
+                    ShieldCharges = System.Math.Min(
+                        ShieldCharges + GameConstants.ShieldChargesPerBuff, 
+                        GameConstants.ShieldMaxCharges);
+                    break;
+                case BuffType.Heal:
+                    Health = System.Math.Min(
+                        Health + GameConstants.HealBuffAmount, 
+                        GameConstants.PlayerMaxHp);
+                    break;
+            }
+        }
+        
+        /// <summary>
+        /// Resets the player to initial state.
+        /// </summary>
+        /// <param name="startPosition">Position to reset to</param>
+        public void Reset(Vector2 startPosition)
+        {
+            Position = startPosition;
+            Facing = new Vector2(0, -1);
+            Health = GameConstants.PlayerStartingHp;
+            ShootCooldownTimer = 0f;
+            
+            // Clear all buffs
+            SpeedBuffTimer = 0f;
+            FireRateBuffTimer = 0f;
+            MultiShotBuffTimer = 0f;
+            ShieldCharges = 0;
+        }
+        
+        /// <summary>
+        /// Updates the player's texture (useful for respawning or changing appearance).
+        /// </summary>
+        /// <param name="newTexture">New texture to use</param>
+        public void SetTexture(Texture2D newTexture)
+        {
+            Texture = newTexture;
+        }
+    }
+}

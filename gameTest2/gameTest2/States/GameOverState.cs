@@ -1,0 +1,65 @@
+using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
+using gameTest2.Systems;
+using gameTest2.Rendering;
+
+namespace gameTest2.States
+{
+    /// <summary>
+    /// Game over state - displays final score and allows return to menu.
+    /// </summary>
+    public class GameOverState : BaseGameState
+    {
+        private readonly MenuRenderer _menuRenderer;
+        private readonly GameStateManager _stateManager;
+        private readonly ScoreDatabase _scoreDatabase;
+        private readonly int _finalScore;
+        private readonly string _playerName;
+        private readonly int _screenWidth;
+        private readonly int _screenHeight;
+
+        public GameOverState(
+            Game1 game,
+            InputManager input,
+            AudioManager audio,
+            MenuRenderer menuRenderer,
+            GameStateManager stateManager,
+            ScoreDatabase scoreDatabase,
+            int finalScore,
+            string playerName,
+            int screenWidth,
+            int screenHeight)
+            : base(game, input, audio)
+        {
+            _menuRenderer = menuRenderer;
+            _stateManager = stateManager;
+            _scoreDatabase = scoreDatabase;
+            _finalScore = finalScore;
+            _playerName = playerName;
+            _screenWidth = screenWidth;
+            _screenHeight = screenHeight;
+        }
+
+        public override void Update(float deltaTime)
+        {
+            int buttonWidth = System.Math.Min(300, _screenWidth - 160);
+            int buttonHeight = 60;
+            int x = (_screenWidth - buttonWidth) / 2;
+            int y = (int)(_screenHeight * 0.7f);
+            var mainMenuRect = new Microsoft.Xna.Framework.Rectangle(x, y, buttonWidth, buttonHeight);
+            
+            if (Input.IsRectangleJustClicked(mainMenuRect))
+            {
+                Game.LoadTopScores();
+                _stateManager.ChangeState(Game.CreateMainMenuState(_stateManager));
+            }
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            // Draw the game state behind the game over overlay (if available)
+            // For now, just draw the game over screen
+            _menuRenderer.DrawGameOver(_finalScore, _playerName, Input.CurrentMouse);
+        }
+    }
+}

@@ -1,0 +1,34 @@
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using gameTest2.Systems;
+
+namespace gameTest2.States
+{
+    public abstract class BaseGameState : IGameState
+    {
+        protected readonly Game1 Game;
+        protected readonly InputManager Input;
+        protected readonly AudioManager Audio;
+
+        protected BaseGameState(Game1 game, InputManager input, AudioManager audio)
+        {
+            Game = game;
+            Input = input;
+            Audio = audio;
+        }
+
+        public virtual void Enter()
+        {
+            // Override in derived classes for state-specific setup
+        }
+
+        public virtual void Exit()
+        {
+            // Override in derived classes for state-specific cleanup
+        }
+
+        public abstract void Update(float deltaTime);
+
+        public abstract void Draw(SpriteBatch spriteBatch);
+    }
+}

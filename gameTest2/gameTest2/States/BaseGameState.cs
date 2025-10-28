@@ -4,10 +4,6 @@ using gameTest2.Systems;
 
 namespace gameTest2.States
 {
-    /// <summary>
-    /// Base class for game states providing common functionality.
-    /// Reduces code duplication across different state implementations.
-    /// </summary>
     public abstract class BaseGameState : IGameState
     {
         protected readonly Game1 Game;

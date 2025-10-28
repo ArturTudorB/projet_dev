@@ -5,9 +5,6 @@ using gameTest2.Rendering;
 
 namespace gameTest2.States
 {
-    /// <summary>
-    /// Game over state - displays final score and allows return to menu.
-    /// </summary>
     public class GameOverState : BaseGameState
     {
         private readonly MenuRenderer _menuRenderer;

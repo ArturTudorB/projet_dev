@@ -351,7 +351,8 @@ namespace gameTest2.Systems
             Action<int> onPlayerDamage,
             Action onPlayerDeath,
             ref int shieldCharges,
-            Func<Vector2, bool> isOffScreen)
+            Func<Vector2, bool> isOffScreen,
+            Action<double> onScoreGain)
         {
             for (int i = lasers.Count - 1; i >= 0; i--)
             {
@@ -399,6 +400,9 @@ namespace gameTest2.Systems
                             en.BlinkToggleTarget = 4;
                             enemies[ei] = en;
                             enemiesDestroyed++;
+
+                            // Award score for enemy kill
+                            onScoreGain(GameConstants.EnemyKillScore);
 
                             // Remove laser
                             lasers.RemoveAt(i);

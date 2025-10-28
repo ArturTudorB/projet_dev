@@ -5,9 +5,6 @@ using gameTest2.Rendering;
 
 namespace gameTest2.States
 {
-    /// <summary>
-    /// Leaderboard state - displays top scores.
-    /// </summary>
     public class LeaderboardState : BaseGameState
     {
         private readonly MenuRenderer _menuRenderer;

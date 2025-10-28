@@ -8,9 +8,6 @@ using gameTest2.Config;
 
 namespace gameTest2.States
 {
-    /// <summary>
-    /// Playing state - handles active gameplay including player control, enemies, and combat.
-    /// </summary>
     public class PlayingState : BaseGameState
     {
         private readonly GameplayRenderer _gameplayRenderer;
@@ -331,7 +328,14 @@ namespace gameTest2.States
                 (damage) => _player.TakeDamage(damage),
                 () => { },
                 ref shieldCharges,
-                IsOffScreen);
+                IsOffScreen,
+                (scoreGain) => {
+                    _score += scoreGain;
+                    _scoreInt = (int)System.Math.Round(_score);
+                });
+            
+            // Apply shield charges back to player after all updates
+            _player.SetShieldCharges(shieldCharges);
             
             _entityUpdater.UpdateBuffPickups(
                 _buffPickups, deltaTime, _player.Position, _player.ApplyBuff);

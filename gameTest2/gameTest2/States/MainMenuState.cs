@@ -6,9 +6,6 @@ using gameTest2.Rendering;
 
 namespace gameTest2.States
 {
-    /// <summary>
-    /// Main menu state - handles menu navigation and options.
-    /// </summary>
     public class MainMenuState : BaseGameState
     {
         private readonly MenuRenderer _menuRenderer;

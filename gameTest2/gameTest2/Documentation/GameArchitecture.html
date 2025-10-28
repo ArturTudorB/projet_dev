@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Architecture - gameTest2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+        }
+
+        h2 {
+            color: #81c784;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #81c784;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #ffb74d;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .diagram-box {
+            background: rgba(20, 20, 30, 0.9);
+            border: 2px solid #4fc3f7;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        pre {
+            color: #a5d6a7;
+            font-size: 0.95em;
+            white-space: pre;
+            line-height: 1.4;
+        }
+
+        .state-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .state-card {
+            background: linear-gradient(135deg, #283593 0%, #1a237e 100%);
+            border: 2px solid #7986cb;
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .state-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(121, 134, 203, 0.4);
+        }
+
+        .state-card h4 {
+            color: #64b5f6;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .state-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .state-card li {
+            color: #b0bec5;
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .state-card li:before {
+            content: "?";
+            position: absolute;
+            left: 0;
+            color: #4fc3f7;
+        }
+
+        .system-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .system-card {
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            border: 2px solid #66bb6a;
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+
+        .system-card:hover {
+            transform: scale(1.05);
+        }
+
+        .system-card h4 {
+            color: #aed581;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-bottom: 1px solid #66bb6a;
+            padding-bottom: 8px;
+        }
+
+        .system-card .property {
+            color: #90caf9;
+            font-size: 0.9em;
+            padding: 3px 0;
+        }
+
+        .system-card .method {
+            color: #ffab91;
+            font-size: 0.9em;
+            padding: 3px 0;
+        }
+
+        .flow-diagram {
+            background: rgba(30, 30, 40, 0.95);
+            border: 2px solid #ffb74d;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .flow-step {
+            background: rgba(255, 183, 77, 0.1);
+            border-left: 4px solid #ffb74d;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .flow-step h4 {
+            color: #ffb74d;
+            margin-bottom: 8px;
+        }
+
+        .flow-step p {
+            color: #cfd8dc;
+            font-size: 0.95em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(20, 20, 30, 0.9);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #424242;
+            color: #b0bec5;
+        }
+
+        tr:hover {
+            background: rgba(79, 195, 247, 0.1);
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .feature-item {
+            background: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
+            border: 2px solid #ab47bc;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-item:before {
+            content: "?";
+            color: #4caf50;
+            font-size: 1.5em;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .code-inline {
+            background: rgba(79, 195, 247, 0.2);
+            color: #4fc3f7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+        }
+
+        .arrow {
+            text-align: center;
+            color: #4fc3f7;
+            font-size: 2em;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .state-grid,
+            .system-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>?? Game Architecture Documentation</h1>
+
+        <h2>?? System Overview</h2>
+        <div class="diagram-box">
+            <pre>
+???????????????????????????????????????????????????????????????????????????????
+?                              GAME1 (Main Entry)                              ?
+?  ?????????????????????????????????????????????????????????????????????????? ?
+?  ? Core Loop: Update() ? Draw()                                           ? ?
+?  ? - Manages GraphicsDeviceManager                                        ? ?
+?  ? - Initializes all systems                                              ? ?
+?  ? - Delegates to GameStateManager                                        ? ?
+?  ?????????????????????????????????????????????????????????????????????????? ?
+???????????????????????????????????????????????????????????????????????????????
+                                       ?
+                    ???????????????????????????????????????
+                    ?                                     ?
+                    ?                                     ?
+    ?????????????????????????????         ????????????????????????????
+    ?   CORE SYSTEMS            ?         ?   RENDERING SYSTEMS      ?
+    ?????????????????????????????         ????????????????????????????
+    ? • InputManager            ?         ? • GameplayRenderer       ?
+    ? • AudioManager            ?         ? • MenuRenderer           ?
+    ? • CollisionDetector       ?         ? • BackgroundAnimator     ?
+    ? • EntitySpawner           ?         ????????????????????????????
+    ? • EntityUpdater           ?
+    ? • ContentLoader           ?
+    ? • ScoreDatabase           ?
+    ?????????????????????????????
+            </pre>
+        </div>
+
+        <h2>?? Game States</h2>
+        <div class="state-grid">
+            <div class="state-card">
+                <h4>Main Menu State</h4>
+                <ul>
+                    <li>Start Game</li>
+                    <li>View Leaderboard</li>
+                    <li>Quit Game</li>
+                    <li>Music: Main Menu Theme</li>
+                </ul>
+            </div>
+
+            <div class="state-card">
+                <h4>Username Input State</h4>
+                <ul>
+                    <li>Text Input Field</li>
+                    <li>Cursor Animation</li>
+                    <li>Enter to Confirm</li>
+                    <li>Backspace Support</li>
+                </ul>
+            </div>
+
+            <div class="state-card">
+                <h4>Playing State</h4>
+                <ul>
+                    <li>Active Gameplay</li>
+                    <li>Entity Management</li>
+                    <li>Collision Detection</li>
+                    <li>Score Tracking</li>
+                </ul>
+            </div>
+
+            <div class="state-card">
+                <h4>Game Over State</h4>
+                <ul>
+                    <li>Final Score Display</li>
+                    <li>Save to Database</li>
+                    <li>Return to Menu</li>
+                    <li>Play Again Option</li>
+                </ul>
+            </div>
+
+            <div class="state-card">
+                <h4>Leaderboard State</h4>
+                <ul>
+                    <li>Top 10 Scores</li>
+                    <li>Player Names</li>
+                    <li>Timestamps</li>
+                    <li>Return Navigation</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>?? Game Flow</h2>
+        <div class="flow-diagram">
+            <div class="flow-step">
+                <h4>1. Initialization Phase</h4>
+                <p><span class="code-inline">Game1()</span> Constructor ? Create Graphics Manager ? Set Fullscreen</p>
+            </div>
+            <div class="arrow">?</div>
+            <div class="flow-step">
+                <h4>2. Initialize Systems</h4>
+                <p><span class="code-inline">Initialize()</span> ? Create Core Systems ? Setup Database</p>
+            </div>
+            <div class="arrow">?</div>
+            <div class="flow-step">
+                <h4>3. Load Content</h4>
+                <p><span class="code-inline">LoadContent()</span> ? Load Textures ? Load Audio ? Create Renderers</p>
+            </div>
+            <div class="arrow">?</div>
+            <div class="flow-step">
+                <h4>4. Main Game Loop</h4>
+                <p><span class="code-inline">Update()</span> + <span class="code-inline">Draw()</span> ? State Manager Delegation ? 60 FPS</p>
+            </div>
+        </div>
+
+        <h2>?? Core Systems</h2>
+        <div class="system-grid">
+            <div class="system-card">
+                <h4>Input Manager</h4>
+                <div class="property">• Keyboard State</div>
+                <div class="property">• Mouse State</div>
+                <div class="property">• GamePad State</div>
+                <div class="method">+ GetMovementDirection()</div>
+                <div class="method">+ IsKeyJustPressed()</div>
+                <div class="method">+ IsRectangleClicked()</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Audio Manager</h4>
+                <div class="property">• Main Menu Music</div>
+                <div class="property">• Button Click Sound</div>
+                <div class="property">• Audio Enabled Flag</div>
+                <div class="method">+ PlayMainMenuMusic()</div>
+                <div class="method">+ PlayButtonClickSound()</div>
+                <div class="method">+ EnsureMusicPlaying()</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Collision Detector</h4>
+                <div class="method">+ CheckEnemyHitsPlayer()</div>
+                <div class="method">+ CheckLaserHitsEnemy()</div>
+                <div class="method">+ CheckLaserHitsPlayer()</div>
+                <div class="method">+ CheckBossHitsPlayer()</div>
+                <div class="method">+ CheckLaserHitsBoss()</div>
+                <div class="method">+ CheckAsteroidHitsPlayer()</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Entity Spawner</h4>
+                <div class="method">+ SpawnEnemy()</div>
+                <div class="method">+ SpawnAsteroid()</div>
+                <div class="method">+ SpawnBoss()</div>
+                <div class="method">+ TrySpawnBuffDrop()</div>
+                <div class="method">+ SpawnLaser()</div>
+                <div class="method">+ CalculateSpawnInterval()</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Entity Updater</h4>
+                <div class="method">+ UpdateLasers()</div>
+                <div class="method">+ UpdateEnemies()</div>
+                <div class="method">+ UpdateAsteroids()</div>
+                <div class="method">+ UpdateBoss()</div>
+                <div class="method">+ UpdateBuffs()</div>
+                <div class="method">+ HandleCollisions()</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Score Database</h4>
+                <div class="property">• SQLite Backend</div>
+                <div class="property">• Scores Table</div>
+                <div class="method">+ SaveScore()</div>
+                <div class="method">+ GetTopScores()</div>
+                <div class="method">+ ClearAllScores()</div>
+            </div>
+        </div>
+
+        <h2>?? Entity Types</h2>
+        <div class="system-grid">
+            <div class="system-card">
+                <h4>Player</h4>
+                <div class="property">• HP: 3 (max)</div>
+                <div class="property">• Shield: 0-3</div>
+                <div class="property">• Speed: Dynamic</div>
+                <div class="property">• Active Buffs</div>
+                <div class="method">+ Move()</div>
+                <div class="method">+ Shoot()</div>
+                <div class="method">+ TakeDamage()</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Enemy</h4>
+                <div class="property">• 4 Types</div>
+                <div class="property">• AI Movement</div>
+                <div class="property">• Shoot at Player</div>
+                <div class="property">• Death Animation</div>
+                <div class="method">+ MoveTowardsPlayer()</div>
+                <div class="method">+ Shoot()</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Boss</h4>
+                <div class="property">• HP: 40-100</div>
+                <div class="property">• 3 Types</div>
+                <div class="property">• Spread Fire</div>
+                <div class="property">• Horizontal Movement</div>
+                <div class="method">+ MoveHorizontally()</div>
+                <div class="method">+ ShootSpread()</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Asteroid</h4>
+                <div class="property">• Multi-Hit HP</div>
+                <div class="property">• 4 Types</div>
+                <div class="property">• Rotation</div>
+                <div class="property">• Death Animation</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Buff Pickup</h4>
+                <div class="property">• 5 Types</div>
+                <div class="property">• Float Animation</div>
+                <div class="property">• Color Pulse</div>
+                <div class="property">• 15s Duration</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Laser</h4>
+                <div class="property">• Player/Enemy</div>
+                <div class="property">• Velocity</div>
+                <div class="property">• Off-screen Removal</div>
+            </div>
+        </div>
+
+        <h2>?? Buff System</h2>
+        <div class="system-grid">
+            <div class="system-card" style="background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);">
+                <h4>Speed Buff ??</h4>
+                <div class="property">• Faster Movement</div>
+                <div class="property">• 15 seconds</div>
+                <div class="property">• +50% Speed</div>
+            </div>
+
+            <div class="system-card" style="background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);">
+                <h4>Fire Rate Buff ??</h4>
+                <div class="property">• Faster Shooting</div>
+                <div class="property">• 15 seconds</div>
+                <div class="property">• -50% Cooldown</div>
+            </div>
+
+            <div class="system-card" style="background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);">
+                <h4>Multi-shot Buff ??</h4>
+                <div class="property">• 3 Laser Spread</div>
+                <div class="property">• 15 seconds</div>
+                <div class="property">• Wide Coverage</div>
+            </div>
+
+            <div class="system-card" style="background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);">
+                <h4>Shield Buff ??</h4>
+                <div class="property">• +1 Shield Charge</div>
+                <div class="property">• Instant Effect</div>
+                <div class="property">• Max 3 Shields</div>
+            </div>
+
+            <div class="system-card" style="background: linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%);">
+                <h4>Health Buff ??</h4>
+                <div class="property">• +1 HP</div>
+                <div class="property">• Instant Effect</div>
+                <div class="property">• Max 3 HP</div>
+            </div>
+        </div>
+
+        <h2>?? Difficulty Scaling</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Score Range</th>
+                    <th>Enemy Spawn</th>
+                    <th>Asteroid Spawn</th>
+                    <th>Enemy Speed</th>
+                    <th>Boss Frequency</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>0 - 49</td>
+                    <td>2.0s</td>
+                    <td>3.5s</td>
+                    <td>1.0x</td>
+                    <td>Every 20 enemies</td>
+                </tr>
+                <tr>
+                    <td>50 - 99</td>
+                    <td>1.8s</td>
+                    <td>3.0s</td>
+                    <td>1.1x</td>
+                    <td>Every 20 enemies</td>
+                </tr>
+                <tr>
+                    <td>100 - 199</td>
+                    <td>1.5s</td>
+                    <td>2.5s</td>
+                    <td>1.2x</td>
+                    <td>Every 20 enemies</td>
+                </tr>
+                <tr>
+                    <td>200 - 499</td>
+                    <td>1.2s</td>
+                    <td>2.0s</td>
+                    <td>1.4x</td>
+                    <td>Every 20 enemies</td>
+                </tr>
+                <tr>
+                    <td>500+</td>
+                    <td>0.8s</td>
+                    <td>1.5s</td>
+                    <td>1.6x</td>
+                    <td>Every 20 enemies</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>? Key Features</h2>
+        <div class="feature-list">
+            <div class="feature-item">State Management Pattern</div>
+            <div class="feature-item">Dependency Injection</div>
+            <div class="feature-item">Audio System with Fallback</div>
+            <div class="feature-item">Multi-Input Support</div>
+            <div class="feature-item">Dynamic Difficulty Scaling</div>
+            <div class="feature-item">Buff System (5 types)</div>
+            <div class="feature-item">Boss Battles</div>
+            <div class="feature-item">Persistent Leaderboard</div>
+            <div class="feature-item">Fullscreen Toggle</div>
+            <div class="feature-item">Death Animations</div>
+            <div class="feature-item">Collision Detection</div>
+            <div class="feature-item">Entity Spawning</div>
+        </div>
+
+        <h2>?? Controls</h2>
+        <div class="system-grid">
+            <div class="system-card">
+                <h4>Keyboard</h4>
+                <div class="property">• WASD: Movement</div>
+                <div class="property">• Space: Shoot</div>
+                <div class="property">• Enter: Confirm</div>
+                <div class="property">• Escape: Back</div>
+                <div class="property">• L: Leaderboard</div>
+                <div class="property">• F11: Fullscreen</div>
+            </div>
+
+            <div class="system-card">
+                <h4>Mouse</h4>
+                <div class="property">• Left Click: Shoot</div>
+                <div class="property">• Click Buttons: Navigate</div>
+                <div class="property">• Hover: Highlight</div>
+            </div>
+
+            <div class="system-card">
+                <h4>GamePad</h4>
+                <div class="property">• Left Stick: Movement</div>
+                <div class="property">• A Button: Shoot/Confirm</div>
+                <div class="property">• B Button: Back</div>
+                <div class="property">• Back Button: Exit</div>
+            </div>
+        </div>
+
+        <h2>?? Project Structure</h2>
+        <div class="diagram-box">
+            <pre>
+gameTest2/
+??? Config/
+?   ??? GameConstants.cs          # Game configuration
+??? Models/
+?   ??? Player.cs                 # Player entity
+?   ??? Enemy.cs                  # Enemy entity
+?   ??? Asteroid.cs               # Asteroid entity
+?   ??? Boss.cs                   # Boss entity
+?   ??? Laser.cs                  # Laser projectile
+?   ??? BuffPickup.cs             # Buff power-up
+?   ??? ScoreEntry.cs             # Score entry
+??? States/
+?   ??? IGameState.cs             # State interface
+?   ??? BaseGameState.cs          # Base state
+?   ??? GameStateManager.cs       # State manager
+?   ??? MainMenuState.cs          # Main menu
+?   ??? UsernameInputState.cs     # Name input
+?   ??? PlayingState.cs           # Gameplay
+?   ??? GameOverState.cs          # Game over
+?   ??? LeaderboardState.cs       # Leaderboard
+??? Systems/
+?   ??? InputManager.cs           # Input handling
+?   ??? AudioManager.cs           # Audio playback
+?   ??? CollisionDetector.cs      # Collision detection
+?   ??? EntitySpawner.cs          # Entity spawning
+?   ??? EntityUpdater.cs          # Entity updates
+?   ??? ContentLoader.cs          # Asset loading
+?   ??? BackgroundAnimator.cs     # Background animation
+?   ??? ScoreDatabase.cs          # Database
+??? Rendering/
+?   ??? GameplayRenderer.cs       # Gameplay rendering
+?   ??? MenuRenderer.cs           # Menu rendering
+??? Game1.cs                      # Main game class
+            </pre>
+        </div>
+    </div>
+</body>
+</html>

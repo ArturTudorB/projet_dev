@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+Ôªøusing Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using gameTest2.Config;
 
@@ -49,18 +49,18 @@ namespace gameTest2.Models
         
         public void Update(float deltaTime)
         {
-            // Mise ‡ jour des timers de buffs
+            // Mise √† jour des timers de buffs
             if (SpeedBuffTimer > 0f) SpeedBuffTimer -= deltaTime;
             if (FireRateBuffTimer > 0f) FireRateBuffTimer -= deltaTime;
             if (MultiShotBuffTimer > 0f) MultiShotBuffTimer -= deltaTime;
             
-            // Mise ‡ jour du cooldown de tir
+            // Mise √† jour du cooldown de tir
             if (ShootCooldownTimer > 0f) ShootCooldownTimer -= deltaTime;
         }
         
         public void Move(Vector2 direction, float deltaTime)
         {
-            // DÈplacement du joueur dans la direction donnÈe
+            // D√©placement du joueur dans la direction donn√©e
             if (direction.LengthSquared() > 0)
             {
                 Vector2 movement = direction * CurrentSpeed * deltaTime;
@@ -71,7 +71,7 @@ namespace gameTest2.Models
         
         public void ClampToScreen(int screenWidth, int screenHeight)
         {
-            // Garde le joueur dans les limites de l'Ècran
+            // Garde le joueur dans les limites de l'√©cran
             float halfWidth = Texture.Width / 2f;
             float halfHeight = Texture.Height / 2f;
             
@@ -93,14 +93,14 @@ namespace gameTest2.Models
         
         public bool TakeDamage(int damage)
         {
-            // Absorbe les dÈg‚ts avec le bouclier si disponible
+            // Absorbe les d√©g√¢ts avec le bouclier si disponible
             if (ShieldCharges > 0)
             {
                 ShieldCharges--;
                 return true;
             }
             
-            // Sinon applique les dÈg‚ts ‡ la santÈ
+            // Sinon applique les d√©g√¢ts √† la sant√©
             Health -= damage;
             if (Health < 0) Health = 0;
             return false;

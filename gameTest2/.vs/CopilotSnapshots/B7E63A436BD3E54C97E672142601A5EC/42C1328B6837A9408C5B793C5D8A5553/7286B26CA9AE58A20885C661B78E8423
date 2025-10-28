@@ -83,7 +83,6 @@ namespace gameTest2
                 _graphics.PreferredBackBufferWidth / 2f,
                 _graphics.PreferredBackBufferHeight / 2f);
 
-            // Initialisation des systèmes de base
             _inputManager = new InputManager();
             
             _scoreDatabase = new ScoreDatabase();
@@ -94,6 +93,8 @@ namespace gameTest2
             _entitySpawner = new EntitySpawner(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             _entityUpdater = new EntityUpdater(_collisionDetector, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             
+            // Note: Player will be fully initialized in LoadContent when texture is available
+            
             base.Initialize();
         }
 
@@ -101,22 +102,22 @@ namespace gameTest2
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             
-            // Initialisation du chargeur de contenu
+            // Initialize content loader
             _contentLoader = new ContentLoader(Content, GraphicsDevice);
             
-            // Chargement et initialisation de l'animation de fond
+            // Load and initialize background animator
             var bgFrames = _contentLoader.LoadBackgroundFrames();
             var bgFallback = bgFrames.Count == 0 ? _contentLoader.CreateBackgroundFallback() : null;
             _backgroundAnimator = new BackgroundAnimator(bgFrames, bgFallback);
 
-            // Chargement du pixel UI
+            // Load UI pixel
             _uiPixel = _contentLoader.CreateUIPixel();
 
-            // Chargement des assets audio
+            // Load audio assets
             var (buttonClickSong, mainMenuMusic) = _contentLoader.LoadAudioAssets();
             _audioManager.Initialize(buttonClickSong, mainMenuMusic);
 
-            // Chargement des textures
+            // Load textures
             var playerTexture = _contentLoader.LoadPlayerTexture();
             _laserTexture = _contentLoader.LoadLaserTexture();
             _enemyTextures = _contentLoader.LoadEnemyTextures();
@@ -125,20 +126,21 @@ namespace gameTest2
             _bossTextures = _contentLoader.LoadBossTextures();
             _scoreFont = _contentLoader.LoadScoreFont();
 
-            // Initialisation du joueur avec sa texture
+            // Initialize player with texture
             Vector2 startPosition = new Vector2(
                 _graphics.PreferredBackBufferWidth / 2f,
                 _graphics.PreferredBackBufferHeight / 2f);
             _player = new Player(playerTexture, startPosition);
 
-            // Initialisation des renderers
+            // Initialize renderers
             _gameplayRenderer = new GameplayRenderer(_spriteBatch, _scoreFont, _uiPixel);
             _menuRenderer = new MenuRenderer(_spriteBatch, _scoreFont, _uiPixel, 
                 _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             
-            // Création du gestionnaire d'états avec état initial
+            // Create a placeholder state manager to avoid null reference during initialization
             _stateManager = new GameStateManager(new PlaceholderState());
             
+            // Now create and set the actual main menu state with the properly initialized state manager
             var mainMenuState = CreateMainMenuState(_stateManager);
             _stateManager.ChangeState(mainMenuState);
         }
@@ -156,17 +158,16 @@ namespace gameTest2
         {
             _graphics.IsFullScreen = !_graphics.IsFullScreen;
             
-            // Ajustement de la résolution selon le mode
             if (_graphics.IsFullScreen)
             {
-                // Mode plein écran - utilise la résolution du bureau
+                // Switch to fullscreen - use desktop resolution
                 var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
                 _graphics.PreferredBackBufferWidth = displayMode.Width;
                 _graphics.PreferredBackBufferHeight = displayMode.Height;
             }
             else
             {
-                // Mode fenêtré - utilise une résolution plus petite
+                // Switch to windowed mode - use smaller resolution
                 _graphics.PreferredBackBufferWidth = 1000;
                 _graphics.PreferredBackBufferHeight = 900;
             }
@@ -176,21 +177,21 @@ namespace gameTest2
 
         protected override void Update(GameTime gameTime)
         {
-            // Mise à jour des états d'entrée
+            // Update input states
             _inputManager.Update();
             
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            // Basculement du mode plein écran (Alt+Enter ou F11)
+            // Global fullscreen toggle (Alt+Enter or F11)
             if (_inputManager.IsFullscreenToggleJustPressed())
             {
                 ToggleFullscreen();
             }
 
-            // Mise à jour de l'animation de fond
+            // Update background animation
             _backgroundAnimator.Update(dt);
 
-            // Délégation au gestionnaire d'états
+            // Delegate to state manager
             _stateManager.Update(dt);
 
             base.Update(gameTime);
@@ -201,11 +202,11 @@ namespace gameTest2
             GraphicsDevice.Clear(XnaColor.Black);
             _spriteBatch.Begin();
 
-            // Dessin du fond animé
+            // Draw animated background
             var backgroundRect = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             _backgroundAnimator.Draw(_spriteBatch, backgroundRect);
 
-            // Délégation au gestionnaire d'états
+            // Delegate to state manager
             _stateManager.Draw(_spriteBatch);
 
             _spriteBatch.End();

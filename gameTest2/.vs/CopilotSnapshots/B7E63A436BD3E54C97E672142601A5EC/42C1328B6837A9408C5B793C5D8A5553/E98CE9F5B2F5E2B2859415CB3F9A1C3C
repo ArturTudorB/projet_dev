@@ -268,4 +268,4 @@ namespace gameTest2
             return pos.X < -margin || pos.X > w + margin || pos.Y < -margin || pos.Y > h + margin;
         }
     }
-}
+}}

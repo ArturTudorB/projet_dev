@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+ï»¿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using gameTest2.Config;
 
@@ -49,18 +49,15 @@ namespace gameTest2.Models
         
         public void Update(float deltaTime)
         {
-            // Mise à jour des timers de buffs
             if (SpeedBuffTimer > 0f) SpeedBuffTimer -= deltaTime;
             if (FireRateBuffTimer > 0f) FireRateBuffTimer -= deltaTime;
             if (MultiShotBuffTimer > 0f) MultiShotBuffTimer -= deltaTime;
             
-            // Mise à jour du cooldown de tir
             if (ShootCooldownTimer > 0f) ShootCooldownTimer -= deltaTime;
         }
         
         public void Move(Vector2 direction, float deltaTime)
         {
-            // Déplacement du joueur dans la direction donnée
             if (direction.LengthSquared() > 0)
             {
                 Vector2 movement = direction * CurrentSpeed * deltaTime;
@@ -71,7 +68,6 @@ namespace gameTest2.Models
         
         public void ClampToScreen(int screenWidth, int screenHeight)
         {
-            // Garde le joueur dans les limites de l'écran
             float halfWidth = Texture.Width / 2f;
             float halfHeight = Texture.Height / 2f;
             
@@ -93,14 +89,12 @@ namespace gameTest2.Models
         
         public bool TakeDamage(int damage)
         {
-            // Absorbe les dégâts avec le bouclier si disponible
             if (ShieldCharges > 0)
             {
                 ShieldCharges--;
                 return true;
             }
             
-            // Sinon applique les dégâts à la santé
             Health -= damage;
             if (Health < 0) Health = 0;
             return false;
@@ -108,7 +102,6 @@ namespace gameTest2.Models
         
         public void ApplyBuff(BuffType buffType)
         {
-            // Application du buff selon son type
             switch (buffType)
             {
                 case BuffType.Speed:

@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+ï»¿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using gameTest2.Systems;
@@ -150,7 +150,7 @@ namespace gameTest2.States
 
         public override void Update(float deltaTime)
         {
-            // Vérification de la mort du joueur
+            // VÃ©rification de la mort du joueur
             if (_player.IsDead)
             {
                 _scoreDatabase.SaveScore(_playerName, _scoreInt);
@@ -167,16 +167,16 @@ namespace gameTest2.States
 
             _spawnedEnemyThisUpdate = false;
             
-            // Mise à jour du joueur
+            // Mise Ã  jour du joueur
             _player.Update(deltaTime);
             
-            // Calcul du score basé sur le temps de jeu
+            // Calcul du score basÃ© sur le temps de jeu
             _totalPlayTime += deltaTime;
             double scoreGain = GameConstants.ScorePerSecond * deltaTime;
             _score += scoreGain;
             _scoreInt = (int)System.Math.Round(_score);
             
-            // Gestion des déplacements du joueur
+            // Gestion des dÃ©placements du joueur
             Vector2 movementDirection = Input.GetMovementDirection();
             if (movementDirection.LengthSquared() > 0)
             {
@@ -191,17 +191,17 @@ namespace gameTest2.States
                 _player.ResetShootCooldown();
             }
             
-            // Mise à jour du boss (spawn et logique)
+            // Mise Ã  jour du boss (spawn et logique)
             UpdateBossLogic(deltaTime);
             
-            // Spawn des ennemis et astéroïdes (seulement si pas de boss actif)
+            // Spawn des ennemis et astÃ©roÃ¯des (seulement si pas de boss actif)
             if (!_bossActive)
             {
                 UpdateEnemySpawning(deltaTime);
                 UpdateAsteroidSpawning(deltaTime);
             }
             
-            // Mise à jour de toutes les entités du jeu
+            // Mise Ã  jour de toutes les entitÃ©s du jeu
             UpdateEntities(deltaTime);
         }
 
@@ -238,7 +238,7 @@ namespace gameTest2.States
 
         private void UpdateBossLogic(float deltaTime)
         {
-            // Vérification si un boss doit apparaître
+            // VÃ©rification si un boss doit apparaÃ®tre
             if (!_bossActive)
             {
                 if (_entitySpawner.ShouldSpawnBoss(_enemiesDestroyed, _bossesDefeated))
@@ -254,12 +254,12 @@ namespace gameTest2.States
                 }
             }
             
-            // Mise à jour du boss s'il est actif
+            // Mise Ã  jour du boss s'il est actif
             if (_bossActive)
             {
                 int shieldCharges = _player.ShieldCharges;
                 
-                // Mise à jour des déplacements et collisions du boss
+                // Mise Ã  jour des dÃ©placements et collisions du boss
                 _entityUpdater.UpdateBoss(
                     ref _bossPosition,
                     ref _bossMovementTimer,
@@ -287,7 +287,7 @@ namespace gameTest2.States
 
         private void UpdateEnemySpawning(float deltaTime)
         {
-            // Spawn des ennemis avec intervalle basé sur la difficulté
+            // Spawn des ennemis avec intervalle basÃ© sur la difficultÃ©
             float enemyInterval = _entitySpawner.CalculateEnemySpawnInterval(_scoreInt);
             _enemySpawnTimer += deltaTime;
             if (_enemySpawnTimer >= enemyInterval && !_spawnedEnemyThisUpdate)
@@ -300,7 +300,7 @@ namespace gameTest2.States
 
         private void UpdateAsteroidSpawning(float deltaTime)
         {
-            // Spawn des astéroïdes avec intervalle basé sur la difficulté
+            // Spawn des astÃ©roÃ¯des avec intervalle basÃ© sur la difficultÃ©
             float asteroidInterval = _entitySpawner.CalculateAsteroidSpawnInterval(_scoreInt);
             _asteroidSpawnTimer += deltaTime;
             if (_asteroidSpawnTimer >= asteroidInterval)
@@ -314,7 +314,7 @@ namespace gameTest2.States
         {
             int shieldCharges = _player.ShieldCharges;
             
-            // Mise à jour des ennemis (déplacements, IA, tirs, collisions)
+            // Mise Ã  jour des ennemis (dÃ©placements, IA, tirs, collisions)
             _entityUpdater.UpdateEnemies(
                 _enemies, _enemyTextures, deltaTime, _scoreInt, _totalPlayTime,
                 _player.Position, _player.Texture,
@@ -323,14 +323,14 @@ namespace gameTest2.States
                 () => { },
                 ref shieldCharges);
             
-            // Mise à jour des astéroïdes (déplacements et collisions)
+            // Mise Ã  jour des astÃ©roÃ¯des (dÃ©placements et collisions)
             _entityUpdater.UpdateAsteroids(
                 _asteroids, deltaTime, _player.Position, _player.Texture,
                 (damage) => _player.TakeDamage(damage),
                 () => { },
                 ref shieldCharges);
             
-            // Mise à jour des lasers (déplacements et collisions)
+            // Mise Ã  jour des lasers (dÃ©placements et collisions)
             _entityUpdater.UpdateLasers(
                 _lasers, _laserTexture, deltaTime, _bossActive, _bossPosition,
                 _bossTextures[_currentBossTextureIndex],
@@ -346,10 +346,10 @@ namespace gameTest2.States
                     _scoreInt = (int)System.Math.Round(_score);
                 });
             
-            // Applique les charges de bouclier au joueur après toutes les mises à jour
+            // Applique les charges de bouclier au joueur aprÃ¨s toutes les mises Ã  jour
             _player.SetShieldCharges(shieldCharges);
             
-            // Mise à jour des buffs (déplacements et collecte)
+            // Mise Ã  jour des buffs (dÃ©placements et collecte)
             _entityUpdater.UpdateBuffPickups(
                 _buffPickups, deltaTime, _player.Position, _player.ApplyBuff);
         }

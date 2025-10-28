@@ -1,0 +1,272 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
+using XnaColor = Microsoft.Xna.Framework.Color;
+using gameTest2.Models;
+using gameTest2.Config;
+using gameTest2.Systems;
+using gameTest2.Rendering;
+using gameTest2.States;
+
+namespace gameTest2
+{
+    public class Game1 : Game
+    {
+        private GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
+
+        // Core Systems
+        private AudioManager _audioManager;
+        private CollisionDetector _collisionDetector;
+        private EntitySpawner _entitySpawner;
+        private EntityUpdater _entityUpdater;
+        private ContentLoader _contentLoader;
+        private InputManager _inputManager;
+        private BackgroundAnimator _backgroundAnimator;
+        private GameStateManager _stateManager;
+        
+        // Rendering
+        private GameplayRenderer _gameplayRenderer;
+        private MenuRenderer _menuRenderer;
+
+        // Shared Game Data (used by states)
+        private Player _player;
+        private readonly List<Laser> _lasers = new();
+        private readonly List<Enemy> _enemies = new();
+        private readonly List<Asteroid> _asteroids = new();
+        private readonly List<BuffPickup> _buffPickups = new();
+        
+        // Textures (shared across states)
+        private Texture2D _laserTexture;
+        private Texture2D[] _enemyTextures = new Texture2D[GameConstants.EnemyTextureCount];
+        private Texture2D[] _asteroidTextures = new Texture2D[GameConstants.AsteroidTextureCount];
+        private Texture2D[] _buffTextures = new Texture2D[5];
+        private Texture2D[] _bossTextures = new Texture2D[GameConstants.BossTextureCount];
+        
+        private float _laserSpeedMultiplier = GameConstants.LaserSpeedMultiplier;
+        private Texture2D _uiPixel;
+        private SpriteFont _scoreFont;
+
+        // Database
+        private ScoreDatabase _scoreDatabase;
+        private List<ScoreEntry> _topScores = new();
+
+        public Game1()
+        {
+            _graphics = new GraphicsDeviceManager(this);
+            
+            // Set fullscreen mode
+            _graphics.IsFullScreen = true;
+            
+            // Optional: Set preferred resolution for fullscreen (uses desktop resolution by default)
+            // _graphics.PreferredBackBufferWidth = 1920;
+            // _graphics.PreferredBackBufferHeight = 1080;
+            
+            // If you want to use desktop resolution, get it from GraphicsAdapter
+            var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+            _graphics.PreferredBackBufferWidth = displayMode.Width;
+            _graphics.PreferredBackBufferHeight = displayMode.Height;
+            
+            _graphics.ApplyChanges();
+            Content.RootDirectory = "Content";
+            IsMouseVisible = true;
+        }
+
+        protected override void Initialize()
+        {
+            Vector2 startPosition = new Vector2(
+                _graphics.PreferredBackBufferWidth / 2f,
+                _graphics.PreferredBackBufferHeight / 2f);
+
+            _inputManager = new InputManager();
+            
+            _scoreDatabase = new ScoreDatabase();
+            LoadTopScores();
+            
+            _audioManager = new AudioManager();
+            _collisionDetector = new CollisionDetector();
+            _entitySpawner = new EntitySpawner(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            _entityUpdater = new EntityUpdater(_collisionDetector, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            
+            // Note: Player will be fully initialized in LoadContent when texture is available
+            
+            base.Initialize();
+        }
+
+        protected override void LoadContent()
+        {
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            
+            // Initialize content loader
+            _contentLoader = new ContentLoader(Content, GraphicsDevice);
+            
+            // Load and initialize background animator
+            var bgFrames = _contentLoader.LoadBackgroundFrames();
+            var bgFallback = bgFrames.Count == 0 ? _contentLoader.CreateBackgroundFallback() : null;
+            _backgroundAnimator = new BackgroundAnimator(bgFrames, bgFallback);
+
+            // Load UI pixel
+            _uiPixel = _contentLoader.CreateUIPixel();
+
+            // Load audio assets
+            var (buttonClickSong, mainMenuMusic) = _contentLoader.LoadAudioAssets();
+            _audioManager.Initialize(buttonClickSong, mainMenuMusic);
+
+            // Load textures
+            var playerTexture = _contentLoader.LoadPlayerTexture();
+            _laserTexture = _contentLoader.LoadLaserTexture();
+            _enemyTextures = _contentLoader.LoadEnemyTextures();
+            _asteroidTextures = _contentLoader.LoadAsteroidTextures();
+            _buffTextures = _contentLoader.LoadBuffTextures();
+            _bossTextures = _contentLoader.LoadBossTextures();
+            _scoreFont = _contentLoader.LoadScoreFont();
+
+            // Initialize player with texture
+            Vector2 startPosition = new Vector2(
+                _graphics.PreferredBackBufferWidth / 2f,
+                _graphics.PreferredBackBufferHeight / 2f);
+            _player = new Player(playerTexture, startPosition);
+
+            // Initialize renderers
+            _gameplayRenderer = new GameplayRenderer(_spriteBatch, _scoreFont, _uiPixel);
+            _menuRenderer = new MenuRenderer(_spriteBatch, _scoreFont, _uiPixel, 
+                _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            
+            // Create a placeholder state manager to avoid null reference during initialization
+            _stateManager = new GameStateManager(new PlaceholderState());
+            
+            // Now create and set the actual main menu state with the properly initialized state manager
+            var mainMenuState = CreateMainMenuState(_stateManager);
+            _stateManager.ChangeState(mainMenuState);
+        }
+        
+        // Temporary placeholder state used only during initialization
+        private class PlaceholderState : IGameState
+        {
+            public void Enter() { }
+            public void Exit() { }
+            public void Update(float deltaTime) { }
+            public void Draw(SpriteBatch spriteBatch) { }
+        }
+
+        private void ToggleFullscreen()
+        {
+            _graphics.IsFullScreen = !_graphics.IsFullScreen;
+            
+            if (_graphics.IsFullScreen)
+            {
+                // Switch to fullscreen - use desktop resolution
+                var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+                _graphics.PreferredBackBufferWidth = displayMode.Width;
+                _graphics.PreferredBackBufferHeight = displayMode.Height;
+            }
+            else
+            {
+                // Switch to windowed mode - use smaller resolution
+                _graphics.PreferredBackBufferWidth = 1000;
+                _graphics.PreferredBackBufferHeight = 900;
+            }
+            
+            _graphics.ApplyChanges();
+        }
+
+        protected override void Update(GameTime gameTime)
+        {
+            // Update input states
+            _inputManager.Update();
+            
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // Global fullscreen toggle (Alt+Enter or F11)
+            if (_inputManager.IsFullscreenToggleJustPressed())
+            {
+                ToggleFullscreen();
+            }
+
+            // Update background animation
+            _backgroundAnimator.Update(dt);
+
+            // Delegate to state manager
+            _stateManager.Update(dt);
+
+            base.Update(gameTime);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(XnaColor.Black);
+            _spriteBatch.Begin();
+
+            // Draw animated background
+            var backgroundRect = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            _backgroundAnimator.Draw(_spriteBatch, backgroundRect);
+
+            // Delegate to state manager
+            _stateManager.Draw(_spriteBatch);
+
+            _spriteBatch.End();
+            base.Draw(gameTime);
+        }
+
+        // ==== State Factory Methods ====
+        // These methods create new state instances with all required dependencies
+
+        public MainMenuState CreateMainMenuState(GameStateManager stateManager)
+        {
+            // Use existing state manager if provided (for transitions), otherwise use the field
+            var manager = stateManager ?? _stateManager;
+            return new MainMenuState(
+                this, _inputManager, _audioManager, _menuRenderer, manager,
+                _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+        }
+
+        public UsernameInputState CreateUsernameInputState(GameStateManager stateManager)
+        {
+            return new UsernameInputState(
+                this, _inputManager, _audioManager, _menuRenderer, stateManager);
+        }
+
+        public PlayingState CreatePlayingState(GameStateManager stateManager, string playerName)
+        {
+            return new PlayingState(
+                this, _inputManager, _audioManager, _gameplayRenderer, stateManager,
+                _entitySpawner, _entityUpdater, _scoreDatabase,
+                _player, playerName, _lasers, _enemies, _asteroids, _buffPickups,
+                _laserTexture, _enemyTextures, _asteroidTextures, _buffTextures, _bossTextures,
+                _laserSpeedMultiplier, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+        }
+
+        public GameOverState CreateGameOverState(GameStateManager stateManager, int finalScore, string playerName)
+        {
+            return new GameOverState(
+                this, _inputManager, _audioManager, _menuRenderer, stateManager, _scoreDatabase,
+                finalScore, playerName, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+        }
+
+        public LeaderboardState CreateLeaderboardState(GameStateManager stateManager)
+        {
+            return new LeaderboardState(
+                this, _inputManager, _audioManager, _menuRenderer, stateManager, _scoreDatabase);
+        }
+
+        // ==== Public Helper Methods (called by states) ====
+
+        public void LoadTopScores()
+        {
+            _topScores = _scoreDatabase.GetTopScores(10);
+        }
+
+        private bool IsOffScreen(Vector2 pos)
+        {
+            int w = _graphics.PreferredBackBufferWidth;
+            int h = _graphics.PreferredBackBufferHeight;
+            int margin = GameConstants.LaserOffScreenMargin;
+            return pos.X < -margin || pos.X > w + margin || pos.Y < -margin || pos.Y > h + margin;
+        }
+    }
+}

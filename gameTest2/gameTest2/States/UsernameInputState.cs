@@ -5,9 +5,6 @@ using gameTest2.Config;
 
 namespace gameTest2.States
 {
-    /// <summary>
-    /// Username input state - handles player name entry before starting the game.
-    /// </summary>
     public class UsernameInputState : BaseGameState
     {
         private readonly MenuRenderer _menuRenderer;

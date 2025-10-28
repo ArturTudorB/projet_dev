@@ -51,11 +51,13 @@ namespace gameTest2.Systems
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
                 var en = enemies[i];
+                
+                // Déplacement vertical de l'ennemi
                 en.Position.Y += en.Speed * dt;
 
                 if (!en.IsDying)
                 {
-                    // Horizontal movement logic
+                    // Gestion du changement de direction horizontale
                     en.HorizontalSwitchTimer += dt;
                     if (en.HorizontalSwitchTimer >= en.HorizontalSwitchInterval)
                     {
@@ -63,12 +65,12 @@ namespace gameTest2.Systems
                         en.HorizontalDir = -en.HorizontalDir;
                     }
 
-                    // Apply horizontal movement with difficulty scaling
+                    // Déplacement horizontal avec scaling de difficulté
                     float horiz = en.HorizontalSpeed;
                     float scale = 1f + MathF.Min(scoreInt / GameConstants.EnemySpeedScoreDivisor, GameConstants.EnemyMaxSpeedMultiplier);
                     en.Position.X += en.HorizontalDir * horiz * scale * dt;
 
-                    // Keep enemies within horizontal bounds
+                    // Garde les ennemis dans les limites de l'écran
                     float left = GameConstants.EnemyHorizontalEdgeMargin;
                     float right = _screenWidth - GameConstants.EnemyHorizontalEdgeMargin;
                     if (en.Position.X < left)
@@ -85,9 +87,10 @@ namespace gameTest2.Systems
                     }
                 }
 
-                // Check collision with player
+                // Vérification de collision avec le joueur
                 if (!en.IsDying && _collisionDetector.CheckEnemyHitsPlayer(en, enemyTextures[en.TextureIndex], playerPosition, playerTexture))
                 {
+                    // Début de l'animation de mort
                     en.IsDying = true;
                     en.Visible = false;
                     en.BlinkTimer = 0f;
@@ -95,7 +98,7 @@ namespace gameTest2.Systems
                     en.BlinkCount = 0;
                     en.BlinkToggleTarget = GameConstants.EnemyBlinkToggleTarget;
 
-                    // Apply damage with shield check
+                    // Application des dégâts avec vérification du bouclier
                     if (shieldCharges > 0)
                     {
                         shieldCharges--;
@@ -106,7 +109,7 @@ namespace gameTest2.Systems
                     }
                 }
 
-                // Handle death animation
+                // Gestion de l'animation de mort (clignotement)
                 if (en.IsDying)
                 {
                     en.BlinkTimer += dt;
@@ -125,19 +128,19 @@ namespace gameTest2.Systems
                     continue;
                 }
 
-                // Remove if off screen
+                // Suppression si hors écran
                 if (en.Position.Y - enemyTextures[en.TextureIndex].Height / 2f > _screenHeight + 50)
                 {
                     enemies.RemoveAt(i);
                     continue;
                 }
 
-                // Enemy shooting logic
+                // Gestion des tirs de l'ennemi
                 if (totalPlayTime >= en.NextShotTime)
                 {
                     onEnemyShoot(en.Position);
                     
-                    // Calculate next shot time with difficulty scaling
+                    // Calcul du prochain tir avec scaling de difficulté
                     float diff = (float)Math.Clamp(1.0 - (scoreInt * 0.000025), 0.4, 1.0);
                     float minShot = GameConstants.EnemyBaseShotMin * diff;
                     float maxShot = GameConstants.EnemyBaseShotMax * diff;
@@ -163,11 +166,14 @@ namespace gameTest2.Systems
             for (int i = asteroids.Count - 1; i >= 0; i--)
             {
                 var a = asteroids[i];
+                
+                // Déplacement de l'astéroïde
                 a.Position += a.Velocity * dt;
 
-                // Check collision with player
+                // Vérification de collision avec le joueur
                 if (!a.IsDying && _collisionDetector.CheckAsteroidHitsPlayer(a, playerPosition, playerTexture))
                 {
+                    // Début de l'animation de mort
                     a.IsDying = true;
                     a.Visible = false;
                     a.BlinkTimer = 0f;
@@ -175,7 +181,7 @@ namespace gameTest2.Systems
                     a.BlinkCount = 0;
                     a.BlinkToggleTarget = GameConstants.AsteroidBlinkToggleTarget;
 
-                    // Apply damage with shield check
+                    // Application des dégâts avec vérification du bouclier
                     if (shieldCharges > 0)
                     {
                         shieldCharges--;
@@ -186,7 +192,7 @@ namespace gameTest2.Systems
                     }
                 }
 
-                // Handle death animation
+                // Gestion de l'animation de mort (clignotement)
                 if (a.IsDying)
                 {
                     a.BlinkTimer += dt;
@@ -205,7 +211,7 @@ namespace gameTest2.Systems
                     continue;
                 }
 
-                // Remove if off screen
+                // Suppression si hors écran
                 if (a.Position.Y - a.Texture.Width / 2f > _screenHeight + 60)
                 {
                     asteroids.RemoveAt(i);
@@ -233,7 +239,7 @@ namespace gameTest2.Systems
             Action onPlayerDeath,
             ref int shieldCharges)
         {
-            // Move boss down towards middle of screen
+            // Déplacement du boss vers le milieu de l'écran
             float halfScreenHeight = _screenHeight / 2f;
             if (bossPosition.Y < halfScreenHeight)
             {
@@ -242,7 +248,7 @@ namespace gameTest2.Systems
                     bossPosition.Y = halfScreenHeight;
             }
 
-            // Horizontal movement
+            // Changement de direction horizontale périodique
             bossMovementTimer += dt;
             if (bossMovementTimer >= GameConstants.BossMovementChangeInterval)
             {
@@ -250,9 +256,10 @@ namespace gameTest2.Systems
                 bossHorizontalDir = -bossHorizontalDir;
             }
 
+            // Déplacement horizontal
             bossPosition.X += bossHorizontalDir * bossHorizontalSpeed * dt;
 
-            // Restrict boss to central zone
+            // Restriction du boss à la zone centrale
             float restrictedZoneWidth = _screenWidth * GameConstants.BossMovementZoneWidthPercent;
             float centerX = _screenWidth / 2f;
             float leftBound = centerX - (restrictedZoneWidth / 2f);
@@ -271,10 +278,10 @@ namespace gameTest2.Systems
                 bossMovementTimer = 0f;
             }
 
-            // Check collision with player
+            // Vérification de collision avec le joueur
             if (_collisionDetector.CheckBossHitsPlayer(bossActive, bossPosition, bossTexture, playerPosition, playerTexture))
             {
-                // Apply damage with shield check
+                // Application des dégâts avec vérification du bouclier
                 if (shieldCharges > 0)
                 {
                     shieldCharges--;
@@ -284,7 +291,7 @@ namespace gameTest2.Systems
                     onPlayerDamage(GameConstants.BossCollisionDamage);
                 }
 
-                // Push boss back slightly
+                // Repousse légèrement le boss
                 bossPosition.Y = Math.Max(bossPosition.Y - 50, halfScreenHeight - 100);
             }
         }
@@ -302,6 +309,7 @@ namespace gameTest2.Systems
         {
             bossShootTimer += dt;
 
+            // Démarrage d'une nouvelle rafale de tirs
             if (!bossIsBursting && bossShootTimer >= GameConstants.BossShootInterval)
             {
                 bossIsBursting = true;
@@ -310,6 +318,7 @@ namespace gameTest2.Systems
                 bossShootTimer = 0f;
             }
 
+            // Gestion de la rafale en cours
             if (bossIsBursting)
             {
                 bossBurstTimer += dt;
@@ -351,39 +360,43 @@ namespace gameTest2.Systems
             Action<int> onPlayerDamage,
             Action onPlayerDeath,
             ref int shieldCharges,
-            Func<Vector2, bool> isOffScreen)
+            Func<Vector2, bool> isOffScreen,
+            Action<double> onScoreGain)
         {
             for (int i = lasers.Count - 1; i >= 0; i--)
             {
                 var l = lasers[i];
+                
+                // Déplacement du laser
                 l.Position += l.Velocity * dt;
                 lasers[i] = l;
                 bool removed = false;
 
+                // Lasers du joueur
                 if (!l.IsEnemy)
                 {
-                    // Boss collision with player lasers
+                    // Collision avec le boss
                     if (_collisionDetector.CheckLaserHitsBoss(bossActive, l.Position, laserTexture, bossPosition, bossTexture))
                     {
                         bossHp--;
                         lasers.RemoveAt(i);
                         removed = true;
 
-                        // Check if boss is defeated
+                        // Vérification si le boss est vaincu
                         if (bossHp <= 0)
                         {
                             isBossActive = false;
                             bossesDefeated++;
                             enemiesDestroyed += 5;
 
-                            // Buff drop always occurs on boss defeat
+                            // Drop de buff garanti lors de la défaite du boss
                             onBuffDrop(bossPosition);
                         }
 
                         if (removed) continue;
                     }
 
-                    // Check enemies
+                    // Collision avec les ennemis
                     for (int ei = 0; ei < enemies.Count; ei++)
                     {
                         var en = enemies[ei];
@@ -391,6 +404,7 @@ namespace gameTest2.Systems
 
                         if (_collisionDetector.CheckLaserHitsEnemy(l.Position, laserTexture, en, enemyTextures[en.TextureIndex]))
                         {
+                            // Début de l'animation de mort de l'ennemi
                             en.IsDying = true;
                             en.Visible = false;
                             en.BlinkTimer = 0f;
@@ -400,11 +414,13 @@ namespace gameTest2.Systems
                             enemies[ei] = en;
                             enemiesDestroyed++;
 
-                            // Remove laser
+                            // Attribution de points
+                            onScoreGain(GameConstants.EnemyKillScore);
+
                             lasers.RemoveAt(i);
                             removed = true;
 
-                            // Chance to drop buff
+                            // Chance de drop de buff
                             onBuffDrop(en.Position);
 
                             break;
@@ -412,7 +428,7 @@ namespace gameTest2.Systems
                     }
                     if (removed) continue;
 
-                    // Check asteroids
+                    // Collision avec les astéroïdes
                     for (int ai = 0; ai < asteroids.Count; ai++)
                     {
                         var a = asteroids[ai];
@@ -423,6 +439,7 @@ namespace gameTest2.Systems
                             a.Hp--;
                             if (a.Hp <= 0)
                             {
+                                // Début de l'animation de mort de l'astéroïde
                                 a.IsDying = true;
                                 a.Visible = false;
                                 a.BlinkTimer = 0f;
@@ -430,7 +447,7 @@ namespace gameTest2.Systems
                                 a.BlinkCount = 0;
                                 a.BlinkToggleTarget = 4;
 
-                                // Chance to drop buff
+                                // Chance de drop de buff
                                 onBuffDrop(a.Position);
                             }
                             asteroids[ai] = a;
@@ -442,13 +459,13 @@ namespace gameTest2.Systems
                 }
                 else
                 {
-                    // Enemy laser hitting player
+                    // Lasers ennemis touchant le joueur
                     if (_collisionDetector.CheckLaserHitsPlayer(l.Position, laserTexture, playerPosition, playerTexture))
                     {
                         lasers.RemoveAt(i);
                         removed = true;
 
-                        // Apply damage with shield check
+                        // Application des dégâts avec vérification du bouclier
                         if (shieldCharges > 0)
                         {
                             shieldCharges--;
@@ -461,6 +478,7 @@ namespace gameTest2.Systems
                     }
                 }
 
+                // Suppression si hors écran
                 if (removed) continue;
                 if (isOffScreen(l.Position))
                     lasers.RemoveAt(i);
@@ -481,13 +499,13 @@ namespace gameTest2.Systems
                 var buff = buffPickups[i];
                 buff.Lifetime -= dt;
 
-                // Make buffs fall downward
+                // Chute du buff vers le bas
                 buff.Position.Y += GameConstants.BuffFallSpeed * dt;
 
-                // Floating animation (horizontal wobble)
+                // Animation flottante (oscillation horizontale)
                 buff.FloatOffset = MathF.Sin(buff.Lifetime * 3f) * GameConstants.BuffFloatAmplitude;
 
-                // Check for pickup
+                // Vérification de la collecte
                 float dist = Vector2.Distance(playerPosition, buff.Position);
                 if (dist < GameConstants.BuffPickupRadius)
                 {
@@ -496,7 +514,7 @@ namespace gameTest2.Systems
                     continue;
                 }
 
-                // Remove if buff goes off screen or expires
+                // Suppression si hors écran ou expiré
                 if (buff.Lifetime <= 0f || buff.Position.Y > _screenHeight + 50)
                 {
                     buffPickups.RemoveAt(i);

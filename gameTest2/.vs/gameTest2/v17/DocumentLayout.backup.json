@@ -1,8 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\",
+  "WorkspaceRootPath": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\",
   "Documents": [
     {
+<<<<<<< HEAD
       "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\documentation\\gamearchitecture.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|",
       "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\documentation\\gamearchitecture.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|"
     },
@@ -16,79 +17,95 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\states\\leaderboardstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+=======
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\states\\leaderboardstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
       "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\leaderboardstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\content\\content.mgcb||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\content\\content.mgcb||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\states\\gameoverstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\gameoverstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\systems\\audiomanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\audiomanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\systems\\collisiondetector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\collisiondetector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\systems\\entityspawner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\entityspawner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\rendering\\gameplayrenderer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\rendering\\gameplayrenderer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\rendering\\menurenderer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\rendering\\menurenderer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\systems\\entityupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\entityupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\systems\\contentloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\contentloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\systems\\inputmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\inputmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\systems\\backgroundanimator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\backgroundanimator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\models\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\models\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\states\\igamestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\igamestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\states\\gamestatemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\gamestatemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\states\\basegamestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\basegamestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\states\\playingstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\playingstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\states\\usernameinputstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\states\\usernameinputstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\usernameinputstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+<<<<<<< HEAD
       "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\states\\gameoverstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\gameoverstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pw10thu\\3emeannee\\projetdev1\\projet_dev\\gametest2\\gametest2\\documentation\\gamearchitecture.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\documentation\\gamearchitecture.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+=======
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\game1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\game1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\models\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\models\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\states\\igamestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\igamestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\states\\gamestatemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\gamestatemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\states\\basegamestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\basegamestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\states\\mainmenustate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\mainmenustate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\states\\playingstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\states\\playingstate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\content\\content.mgcb||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\content\\content.mgcb||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\systems\\audiomanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\audiomanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\systems\\collisiondetector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\collisiondetector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\systems\\entityspawner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\entityspawner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\rendering\\gameplayrenderer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\rendering\\gameplayrenderer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\rendering\\menurenderer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\rendering\\menurenderer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\systems\\entityupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\entityupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\systems\\contentloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\contentloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\systems\\inputmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\inputmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|c:\\users\\pd52nbo\\desktop\\projet_dev\\gametest2\\gametest2\\systems\\backgroundanimator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{441D300C-C020-4A6A-997D-C98DE9AA7B01}|gameTest2\\gameTest2.csproj|solutionrelative:gametest2\\systems\\backgroundanimator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
     }
   ],
   "DocumentGroupContainers": [
@@ -98,10 +115,110 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
+<<<<<<< HEAD
           "SelectedChildIndex": 1,
+=======
+          "SelectedChildIndex": 10,
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
           "Children": [
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
               "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "PlayingState.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\PlayingState.cs",
+              "RelativeDocumentMoniker": "gameTest2\\States\\PlayingState.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\PlayingState.cs",
+              "RelativeToolTip": "gameTest2\\States\\PlayingState.cs",
+              "ViewState": "AgIAAHwBAAAAAAAAAAAAAJYBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T14:32:28.15Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "MainMenuState.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\MainMenuState.cs",
+              "RelativeDocumentMoniker": "gameTest2\\States\\MainMenuState.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\MainMenuState.cs",
+              "RelativeToolTip": "gameTest2\\States\\MainMenuState.cs",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAAAFIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T14:31:32.777Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "BaseGameState.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\BaseGameState.cs",
+              "RelativeDocumentMoniker": "gameTest2\\States\\BaseGameState.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\BaseGameState.cs",
+              "RelativeToolTip": "gameTest2\\States\\BaseGameState.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T14:31:11.551Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "GameStateManager.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\GameStateManager.cs",
+              "RelativeDocumentMoniker": "gameTest2\\States\\GameStateManager.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\GameStateManager.cs*",
+              "RelativeToolTip": "gameTest2\\States\\GameStateManager.cs*",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T14:31:00.853Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "IGameState.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\IGameState.cs",
+              "RelativeDocumentMoniker": "gameTest2\\States\\IGameState.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\IGameState.cs",
+              "RelativeToolTip": "gameTest2\\States\\IGameState.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T14:30:44.39Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Player.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Models\\Player.cs",
+              "RelativeDocumentMoniker": "gameTest2\\Models\\Player.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Models\\Player.cs",
+              "RelativeToolTip": "gameTest2\\Models\\Player.cs",
+              "ViewState": "AgIAAIAAAAAAAAAAAAAAAJ8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T14:19:26.217Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Game1.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Game1.cs",
+              "RelativeDocumentMoniker": "gameTest2\\Game1.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Game1.cs",
+              "RelativeToolTip": "gameTest2\\Game1.cs",
+              "ViewState": "AgIAAOkAAAAAAAAAAAAAAA4BAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-26T13:43:07.545Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 21,
               "Title": "GameArchitecture.html",
               "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Documentation\\GameArchitecture.html",
@@ -111,11 +228,36 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAJcCAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
               "WhenOpened": "2025-10-28T11:03:34.703Z",
+=======
+              "DocumentIndex": 2,
+              "Title": "UsernameInputState.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\UsernameInputState.cs",
+              "RelativeDocumentMoniker": "gameTest2\\States\\UsernameInputState.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\UsernameInputState.cs",
+              "RelativeToolTip": "gameTest2\\States\\UsernameInputState.cs",
+              "ViewState": "AgIAAEsAAAAAAAAAAAAAAGUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T14:32:49.352Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "GameOverState.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\GameOverState.cs",
+              "RelativeDocumentMoniker": "gameTest2\\States\\GameOverState.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\GameOverState.cs",
+              "RelativeToolTip": "gameTest2\\States\\GameOverState.cs",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAAD4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T14:33:06.622Z",
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
+<<<<<<< HEAD
               "Title": "GameArchitecture.md",
               "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Documentation\\GameArchitecture.md",
               "RelativeDocumentMoniker": "gameTest2\\Documentation\\GameArchitecture.md",
@@ -129,17 +271,20 @@
             {
               "$type": "Document",
               "DocumentIndex": 3,
+=======
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
               "Title": "LeaderboardState.cs",
-              "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\States\\LeaderboardState.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\LeaderboardState.cs",
               "RelativeDocumentMoniker": "gameTest2\\States\\LeaderboardState.cs",
-              "ToolTip": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\States\\LeaderboardState.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\States\\LeaderboardState.cs",
               "RelativeToolTip": "gameTest2\\States\\LeaderboardState.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAADIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-27T14:33:33.372Z"
             },
             {
               "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 20,
               "Title": "GameOverState.cs",
               "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\States\\GameOverState.cs",
@@ -273,22 +418,65 @@
             {
               "$type": "Document",
               "DocumentIndex": 10,
+=======
+              "DocumentIndex": 19,
+              "Title": "BackgroundAnimator.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\BackgroundAnimator.cs",
+              "RelativeDocumentMoniker": "gameTest2\\Systems\\BackgroundAnimator.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\BackgroundAnimator.cs",
+              "RelativeToolTip": "gameTest2\\Systems\\BackgroundAnimator.cs",
+              "ViewState": "AgIAAFwAAAAAAAAAAAAuwGMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T14:08:14.125Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "InputManager.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\InputManager.cs",
+              "RelativeDocumentMoniker": "gameTest2\\Systems\\InputManager.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\InputManager.cs",
+              "RelativeToolTip": "gameTest2\\Systems\\InputManager.cs",
+              "ViewState": "AgIAAMoAAAAAAAAAAAAIwOYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T13:27:10.363Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "ContentLoader.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\ContentLoader.cs",
+              "RelativeDocumentMoniker": "gameTest2\\Systems\\ContentLoader.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\ContentLoader.cs",
+              "RelativeToolTip": "gameTest2\\Systems\\ContentLoader.cs",
+              "ViewState": "AgIAAFkAAAAAAAAAAAAIwHcBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T13:22:09.049Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
               "Title": "EntityUpdater.cs",
-              "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Systems\\EntityUpdater.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\EntityUpdater.cs",
               "RelativeDocumentMoniker": "gameTest2\\Systems\\EntityUpdater.cs",
-              "ToolTip": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Systems\\EntityUpdater.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\EntityUpdater.cs",
               "RelativeToolTip": "gameTest2\\Systems\\EntityUpdater.cs",
-              "ViewState": "AgIAAGYAAAAAAAAAAAAowP4BAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAA0CAAAAAAAAAABRwBACAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-27T13:11:40.446Z"
             },
             {
               "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 9,
+=======
+              "DocumentIndex": 15,
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
               "Title": "MenuRenderer.cs",
-              "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Rendering\\MenuRenderer.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Rendering\\MenuRenderer.cs",
               "RelativeDocumentMoniker": "gameTest2\\Rendering\\MenuRenderer.cs",
-              "ToolTip": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Rendering\\MenuRenderer.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Rendering\\MenuRenderer.cs",
               "RelativeToolTip": "gameTest2\\Rendering\\MenuRenderer.cs",
               "ViewState": "AgIAAAkBAAAAAAAAAAAiwBsBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -296,11 +484,15 @@
             },
             {
               "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 8,
+=======
+              "DocumentIndex": 14,
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
               "Title": "GameplayRenderer.cs",
-              "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Rendering\\GameplayRenderer.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Rendering\\GameplayRenderer.cs",
               "RelativeDocumentMoniker": "gameTest2\\Rendering\\GameplayRenderer.cs",
-              "ToolTip": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Rendering\\GameplayRenderer.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Rendering\\GameplayRenderer.cs",
               "RelativeToolTip": "gameTest2\\Rendering\\GameplayRenderer.cs",
               "ViewState": "AgIAAMAAAAAAAAAAAAAkwNsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -308,23 +500,31 @@
             },
             {
               "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 7,
+=======
+              "DocumentIndex": 13,
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
               "Title": "EntitySpawner.cs",
-              "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Systems\\EntitySpawner.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\EntitySpawner.cs",
               "RelativeDocumentMoniker": "gameTest2\\Systems\\EntitySpawner.cs",
-              "ToolTip": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Systems\\EntitySpawner.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\EntitySpawner.cs",
               "RelativeToolTip": "gameTest2\\Systems\\EntitySpawner.cs",
-              "ViewState": "AgIAACgBAAAAAAAAAAAswDYBAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAEEBAAAAAAAAAABRwEQBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-27T12:41:54.513Z"
             },
             {
               "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 6,
+=======
+              "DocumentIndex": 12,
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
               "Title": "CollisionDetector.cs",
-              "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Systems\\CollisionDetector.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\CollisionDetector.cs",
               "RelativeDocumentMoniker": "gameTest2\\Systems\\CollisionDetector.cs",
-              "ToolTip": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Systems\\CollisionDetector.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\CollisionDetector.cs",
               "RelativeToolTip": "gameTest2\\Systems\\CollisionDetector.cs",
               "ViewState": "AgIAALMAAAAAAAAAAAAAAMIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -332,11 +532,15 @@
             },
             {
               "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 5,
+=======
+              "DocumentIndex": 11,
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
               "Title": "AudioManager.cs",
-              "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Systems\\AudioManager.cs",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\AudioManager.cs",
               "RelativeDocumentMoniker": "gameTest2\\Systems\\AudioManager.cs",
-              "ToolTip": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Systems\\AudioManager.cs",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Systems\\AudioManager.cs",
               "RelativeToolTip": "gameTest2\\Systems\\AudioManager.cs",
               "ViewState": "AgIAAJ0AAAAAAAAAAAAYwKcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -344,6 +548,7 @@
             },
             {
               "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 1,
               "Title": "Game1.cs",
               "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Game1.cs",
@@ -358,10 +563,13 @@
             {
               "$type": "Document",
               "DocumentIndex": 4,
+=======
+              "DocumentIndex": 10,
+>>>>>>> 1d68a8a22b0a0db943bf4d87274c24c766cbaf09
               "Title": "Content.mgcb",
-              "DocumentMoniker": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Content\\Content.mgcb",
+              "DocumentMoniker": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Content\\Content.mgcb",
               "RelativeDocumentMoniker": "gameTest2\\Content\\Content.mgcb",
-              "ToolTip": "C:\\Users\\pw10thu\\3emeAnnee\\projetDev1\\projet_dev\\gameTest2\\gameTest2\\Content\\Content.mgcb",
+              "ToolTip": "C:\\Users\\pd52nbo\\Desktop\\projet_dev\\gameTest2\\gameTest2\\Content\\Content.mgcb",
               "RelativeToolTip": "gameTest2\\Content\\Content.mgcb",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",

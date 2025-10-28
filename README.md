@@ -41,7 +41,7 @@ dotnet run
 - `Alt+Entrée` / `F11` : Basculer plein écran
 
 ### En jeu
-- `ZQSD` / `Flèches` : Déplacer le vaisseau
+- `WASD` / `Flèches` : Déplacer le vaisseau
 - `Clic gauche` : Tirer
 - `Échap` : Retour au menu
 

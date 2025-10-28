@@ -37,16 +37,17 @@ namespace gameTest2.Systems
         /// <returns>A new Enemy instance</returns>
         public Enemy SpawnEnemy(Texture2D[] enemyTextures, int currentScore, float totalPlayTime)
         {
+            // Position aléatoire en haut de l'écran
             const int margin = 40;
             Vector2 pos = new(_random.Next(margin, _screenWidth - margin), -margin);
             int texIndex = _random.Next(enemyTextures.Length);
 
-            // Difficulty scaling for shooting frequency
+            // Calcul de la fréquence de tir basée sur la difficulté
             float diff = (float)Math.Clamp(1.0 - (currentScore * GameConstants.EnemyShotDifficultyFactor), 0.4, 1.0);
             float minShot = GameConstants.EnemyBaseShotMin * diff;
             float maxShot = GameConstants.EnemyBaseShotMax * diff;
 
-            // Difficulty scaling for horizontal movement
+            // Calcul de la vitesse horizontale avec scaling de difficulté
             float baseHoriz = (float)(_random.NextDouble() * 
                 (GameConstants.EnemyHorizontalSpeedMax - GameConstants.EnemyHorizontalSpeedMin) + 
                 GameConstants.EnemyHorizontalSpeedMin);
@@ -82,11 +83,12 @@ namespace gameTest2.Systems
         /// <returns>A new Asteroid instance</returns>
         public Asteroid SpawnAsteroid(Texture2D[] asteroidTextures)
         {
+            // Position aléatoire en haut de l'écran
             const int margin = 50;
             Vector2 pos = new(_random.Next(margin, _screenWidth - margin), -60);
             int texIndex = _random.Next(asteroidTextures.Length);
             
-            // Random velocity with vertical and horizontal components
+            // Vélocité aléatoire avec composantes verticale et horizontale
             float vy = (float)(_random.NextDouble() * 70 + 90);
             float vx = (float)(_random.NextDouble() * 80 - 40);
 
@@ -112,8 +114,9 @@ namespace gameTest2.Systems
         /// <returns>Boss spawn position and initial horizontal direction</returns>
         public (Vector2 position, float horizontalDir) SpawnBoss(int textureIndex)
         {
+            // Spawn au centre en haut de l'écran
             Vector2 position = new Vector2(_screenWidth / 2f, -100);
-            float horizontalDir = _random.Next(0, 2) == 0 ? -1f : 1f; // Random initial direction
+            float horizontalDir = _random.Next(0, 2) == 0 ? -1f : 1f;
             
             return (position, horizontalDir);
         }
@@ -126,9 +129,10 @@ namespace gameTest2.Systems
         /// <returns>A new BuffPickup if successful, null otherwise</returns>
         public BuffPickup? TrySpawnBuffDrop(Vector2 position)
         {
+            // Chance de drop de buff
             if (_random.NextDouble() < GameConstants.BuffDropChance)
             {
-                // Random buff type
+                // Type de buff aléatoire
                 BuffType type = (BuffType)_random.Next(0, 5);
 
                 return new BuffPickup
@@ -163,15 +167,18 @@ namespace gameTest2.Systems
             float laserSpeedMultiplier,
             float textureHeight)
         {
+            // Normalisation de la direction
             Vector2 dir = direction;
             if (dir.LengthSquared() < 0.0001f) 
                 dir = facing;
             else 
                 dir.Normalize();
 
+            // Position de spawn à l'avant de l'entité
             float frontOffset = (textureHeight / 2f) + GameConstants.LaserSpawnOffset;
             Vector2 spawnPos = origin + dir * frontOffset;
             
+            // Calcul de la vitesse du laser
             float speedMult = playerSpeed * laserSpeedMultiplier;
             if (isEnemy) 
                 speedMult *= GameConstants.EnemyLaserSpeedFactor;
@@ -204,6 +211,7 @@ namespace gameTest2.Systems
             float laserSpeedMultiplier,
             float textureHeight)
         {
+            // Calcul de la direction vers la cible
             Vector2 dir = target - origin;
             return SpawnLaserInDirection(origin, dir, facing, isEnemy, playerSpeed, laserSpeedMultiplier, textureHeight);
         }
@@ -224,16 +232,18 @@ namespace gameTest2.Systems
             float laserSpeedMultiplier,
             float bossTextureHeight)
         {
+            // Direction vers le joueur
             Vector2 directionToPlayer = playerPosition - bossPosition;
             directionToPlayer.Normalize();
 
-            // Add random spread
+            // Ajout d'une dispersion aléatoire
             float spreadAngle = (float)(_random.NextDouble() - 0.5) * 0.5f;
             float currentAngle = (float)Math.Atan2(directionToPlayer.Y, directionToPlayer.X);
             float newAngle = currentAngle + spreadAngle;
 
             Vector2 shotDirection = new Vector2((float)Math.Cos(newAngle), (float)Math.Sin(newAngle));
 
+            // Calcul de la position et vitesse du laser
             float bossLaserSpeed = playerSpeed * laserSpeedMultiplier * GameConstants.BossLaserSpeedMultiplier;
             Vector2 spawnOffset = shotDirection * (bossTextureHeight / 2f + 10f);
             Vector2 laserPosition = bossPosition + spawnOffset;
@@ -253,6 +263,7 @@ namespace gameTest2.Systems
         /// <returns>Spawn interval in seconds</returns>
         public float CalculateEnemySpawnInterval(int currentScore)
         {
+            // Réduction de l'intervalle de spawn basée sur le score
             int steps = currentScore / GameConstants.ScoreDifficultyStep;
             float interval = GameConstants.BaseEnemySpawnInterval - steps * GameConstants.ScoreIntervalReductionPerStep;
             return Math.Max(interval, GameConstants.MinEnemySpawnInterval);
@@ -265,6 +276,7 @@ namespace gameTest2.Systems
         /// <returns>Spawn interval in seconds</returns>
         public float CalculateAsteroidSpawnInterval(int currentScore)
         {
+            // Réduction de l'intervalle de spawn basée sur le score
             float interval = GameConstants.AsteroidSpawnBaseInterval - (currentScore * GameConstants.AsteroidSpawnDifficultyFactor);
             return Math.Max(interval, GameConstants.AsteroidSpawnMinInterval);
         }
@@ -276,14 +288,15 @@ namespace gameTest2.Systems
         /// <returns>Index of the boss texture to use</returns>
         public int GetBossTextureIndex(int bossesDefeated)
         {
+            // Premier boss utilise la texture verte
             if (bossesDefeated == 0)
             {
-                return 2; // First boss uses texture index 2 (green)
+                return 2;
             }
             else
             {
-                // Cycle through boss textures: boss1, boss2, boss4
-                int[] bossSequence = { 0, 1, 3 }; // indices for red, blue, purple
+                // Cycle à travers les textures de boss suivantes
+                int[] bossSequence = { 0, 1, 3 };
                 return bossSequence[(bossesDefeated - 1) % bossSequence.Length];
             }
         }
@@ -296,6 +309,7 @@ namespace gameTest2.Systems
         /// <returns>True if a boss should spawn</returns>
         public bool ShouldSpawnBoss(int enemiesDestroyed, int bossesDefeated)
         {
+            // Vérification si le seuil pour spawn du boss est atteint
             if (bossesDefeated == 0)
             {
                 return enemiesDestroyed >= GameConstants.FirstBossSpawnThreshold;

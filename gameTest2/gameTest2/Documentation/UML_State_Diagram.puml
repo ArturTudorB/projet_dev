@@ -1,0 +1,17 @@
+@startuml Game State Diagram - Simple
+
+[*] --> MainMenu
+
+MainMenu --> UsernameInput : Start Game
+MainMenu --> Leaderboard : View Scores
+MainMenu --> [*] : Quit
+
+UsernameInput --> Playing : Enter Name
+
+Playing --> GameOver : Player Dies
+
+GameOver --> MainMenu : Return to Menu
+
+Leaderboard --> MainMenu : Back
+
+@enduml

@@ -1,0 +1,375 @@
+﻿using System;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Media;
+using XnaColor = Microsoft.Xna.Framework.Color;
+using gameTest2.Config;
+
+namespace gameTest2.Systems
+{
+    /// <summary>
+    /// Handles loading of all game content including textures, audio, and fonts.
+    /// Provides fallback texture generation when assets fail to load.
+    /// Centralizes all asset loading logic for better organization and error handling.
+    /// </summary>
+    public class ContentLoader
+    {
+        private readonly ContentManager _content;
+        private readonly GraphicsDevice _graphicsDevice;
+
+        /// <summary>
+        /// Initializes the content loader with required MonoGame services.
+        /// </summary>
+        /// <param name="content">MonoGame Content Manager</param>
+        /// <param name="graphicsDevice">Graphics device for creating fallback textures</param>
+        public ContentLoader(ContentManager content, GraphicsDevice graphicsDevice)
+        {
+            _content = content;
+            _graphicsDevice = graphicsDevice;
+        }
+
+        /// <summary>
+        /// Creates a 1x1 white pixel texture for UI rendering.
+        /// </summary>
+        public Texture2D CreateUIPixel()
+        {
+            var pixel = new Texture2D(_graphicsDevice, 1, 1);
+            pixel.SetData(new[] { XnaColor.White });
+            return pixel;
+        }
+
+        /// <summary>
+        /// Loads audio assets (songs) for the game.
+        /// </summary>
+        /// <returns>Tuple of (buttonClickSong, mainMenuMusic). Returns nulls if loading fails.</returns>
+        public (Song buttonClickSong, Song mainMenuMusic) LoadAudioAssets()
+        {
+            Song buttonClickSong = null;
+            Song mainMenuMusic = null;
+
+            try
+            {
+                buttonClickSong = _content.Load<Song>("game_music/son_du_clic_menu");
+            }
+            catch
+            {
+                System.Diagnostics.Debug.WriteLine("Failed to load button click sound");
+            }
+
+            try
+            {
+                mainMenuMusic = _content.Load<Song>("game_music/main_menu_music");
+            }
+            catch
+            {
+                System.Diagnostics.Debug.WriteLine("Failed to load main menu music");
+            }
+
+            return (buttonClickSong, mainMenuMusic);
+        }
+
+        /// <summary>
+        /// Loads the player texture with fallback generation.
+        /// </summary>
+        public Texture2D LoadPlayerTexture()
+        {
+            try
+            {
+                return _content.Load<Texture2D>("textures/hero/hero");
+            }
+            catch
+            {
+                // Create fallback player texture
+                var texture = new Texture2D(_graphicsDevice, 64, 64);
+                var colorData = new XnaColor[64 * 64];
+                for (int i = 0; i < colorData.Length; i++)
+                {
+                    int x = i % 64;
+                    int y = i / 64;
+                    colorData[i] = (x < 5 || x > 58 || y < 5 || y > 58)
+                        ? XnaColor.Red
+                        : XnaColor.Blue;
+                }
+                texture.SetData(colorData);
+                return texture;
+            }
+        }
+
+        /// <summary>
+        /// Loads the laser texture with fallback generation.
+        /// </summary>
+        public Texture2D LoadLaserTexture()
+        {
+            try
+            {
+                return _content.Load<Texture2D>("textures/lasers/laserViolet");
+            }
+            catch
+            {
+                // Create fallback laser texture
+                int lw = 6, lh = 18;
+                var texture = new Texture2D(_graphicsDevice, lw, lh);
+                var arr = Enumerable.Repeat(XnaColor.FromNonPremultiplied(148, 0, 211, 255), lw * lh).ToArray();
+                texture.SetData(arr);
+                return texture;
+            }
+        }
+
+        /// <summary>
+        /// Loads all enemy textures with fallback generation.
+        /// </summary>
+        public Texture2D[] LoadEnemyTextures()
+        {
+            var textures = new Texture2D[GameConstants.EnemyTextureCount];
+
+            for (int i = 0; i < GameConstants.EnemyTextureCount; i++)
+            {
+                string path = $"textures/ennemis/ennemi{i + 1}";
+                try
+                {
+                    textures[i] = _content.Load<Texture2D>(path);
+                }
+                catch
+                {
+                    // Create fallback enemy texture
+                    textures[i] = CreateFallbackEnemyTexture(i);
+                }
+            }
+
+            return textures;
+        }
+
+        /// <summary>
+        /// Loads all asteroid textures with fallback generation.
+        /// </summary>
+        public Texture2D[] LoadAsteroidTextures()
+        {
+            var textures = new Texture2D[GameConstants.AsteroidTextureCount];
+
+            for (int i = 0; i < GameConstants.AsteroidTextureCount; i++)
+            {
+                string path = $"textures/asteroide/asteroide{i + 1}";
+                try
+                {
+                    textures[i] = _content.Load<Texture2D>(path);
+                }
+                catch
+                {
+                    // Create fallback asteroid texture
+                    textures[i] = CreateFallbackAsteroidTexture();
+                }
+            }
+
+            return textures;
+        }
+
+        /// <summary>
+        /// Loads all buff/power-up textures with fallback generation.
+        /// </summary>
+        public Texture2D[] LoadBuffTextures()
+        {
+            var textures = new Texture2D[5];
+            string[] buffFiles = { "vitesse", "cadence", "tirMultiple", "immunite", "soin" };
+
+            for (int i = 0; i < 5; i++)
+            {
+                try
+                {
+                    textures[i] = _content.Load<Texture2D>($"textures/buff/{buffFiles[i]}");
+                }
+                catch
+                {
+                    // Create fallback buff texture
+                    textures[i] = CreateFallbackBuffTexture(i);
+                }
+            }
+
+            return textures;
+        }
+
+        /// <summary>
+        /// Loads all boss textures with fallback generation.
+        /// </summary>
+        public Texture2D[] LoadBossTextures()
+        {
+            var textures = new Texture2D[GameConstants.BossTextureCount];
+
+            try
+            {
+                // Try to load all 4 boss textures
+                for (int i = 0; i < GameConstants.BossTextureCount; i++)
+                {
+                    try
+                    {
+                        textures[i] = _content.Load<Texture2D>($"textures/boss/boss{i + 1}");
+                    }
+                    catch
+                    {
+                        // Create fallback boss texture for this specific boss
+                        textures[i] = CreateFallbackBossTexture(i);
+                    }
+                }
+            }
+            catch
+            {
+                // If even the fallback creation fails, create a simple fallback
+                var fallback = CreateFallbackBossTexture(0);
+                for (int i = 0; i < GameConstants.BossTextureCount; i++)
+                {
+                    textures[i] = fallback;
+                }
+            }
+
+            return textures;
+        }
+
+        /// <summary>
+        /// Loads background animation frames.
+        /// </summary>
+        /// <returns>List of background frames. Empty list if no frames could be loaded.</returns>
+        public System.Collections.Generic.List<Texture2D> LoadBackgroundFrames()
+        {
+            var frames = new System.Collections.Generic.List<Texture2D>();
+
+            for (int i = 0; i <= 32; i++)
+            {
+                string name = $"textures/background/frame{i:00}";
+                try
+                {
+                    frames.Add(_content.Load<Texture2D>(name));
+                }
+                catch
+                {
+                    // Skip frames that don't exist
+                }
+            }
+
+            return frames;
+        }
+
+        /// <summary>
+        /// Creates a simple black fallback texture for the background.
+        /// </summary>
+        public Texture2D CreateBackgroundFallback()
+        {
+            var texture = new Texture2D(_graphicsDevice, 1, 1);
+            texture.SetData(new[] { XnaColor.Black });
+            return texture;
+        }
+
+        /// <summary>
+        /// Attempts to load the score font.
+        /// </summary>
+        /// <returns>SpriteFont if successful, null otherwise</returns>
+        public SpriteFont LoadScoreFont()
+        {
+            try
+            {
+                return _content.Load<SpriteFont>("fonts/score");
+            }
+            catch
+            {
+                System.Diagnostics.Debug.WriteLine("Failed to load score font");
+                return null;
+            }
+        }
+
+        // Private helper methods for creating fallback textures
+
+        private Texture2D CreateFallbackEnemyTexture(int index)
+        {
+            int size = 32;
+            var tex = new Texture2D(_graphicsDevice, size, size);
+            var pixels = Enumerable.Repeat(
+                (index % 3) switch
+                {
+                    0 => XnaColor.DarkRed,
+                    1 => XnaColor.DarkGreen,
+                    _ => XnaColor.DarkSlateBlue
+                }, size * size).ToArray();
+            tex.SetData(pixels);
+            return tex;
+        }
+
+        private Texture2D CreateFallbackAsteroidTexture()
+        {
+            int size = 48;
+            var tex = new Texture2D(_graphicsDevice, size, size);
+            var pixels = new XnaColor[size * size];
+            for (int p = 0; p < pixels.Length; p++)
+            {
+                int x = p % size;
+                int y = p / size;
+                float dx = x - size / 2f;
+                float dy = y - size / 2f;
+                float d = MathF.Sqrt(dx * dx + dy * dy);
+                pixels[p] = d < size * 0.45f ? XnaColor.Gray : XnaColor.Transparent;
+            }
+            tex.SetData(pixels);
+            return tex;
+        }
+
+        private Texture2D CreateFallbackBuffTexture(int buffIndex)
+        {
+            int size = 32;
+            var texture = new Texture2D(_graphicsDevice, size, size);
+            var pixels = new XnaColor[size * size];
+            
+            XnaColor buffColor = buffIndex switch
+            {
+                0 => XnaColor.Cyan,      // Speed
+                1 => XnaColor.Yellow,    // Fire rate
+                2 => XnaColor.Orange,    // Multi-shot
+                3 => XnaColor.Blue,      // Shield
+                _ => XnaColor.Green      // Heal
+            };
+
+            for (int p = 0; p < pixels.Length; p++)
+            {
+                int x = p % size;
+                int y = p / size;
+                float dx = x - size / 2f;
+                float dy = y - size / 2f;
+                float d = MathF.Sqrt(dx * dx + dy * dy);
+
+                pixels[p] = d < size * 0.4f ? buffColor : XnaColor.Transparent;
+            }
+            texture.SetData(pixels);
+            return texture;
+        }
+
+        private Texture2D CreateFallbackBossTexture(int bossIndex)
+        {
+            int bossSize = 96;
+            var texture = new Texture2D(_graphicsDevice, bossSize, bossSize);
+            var bossPixels = new XnaColor[bossSize * bossSize];
+
+            // Different color for each boss
+            XnaColor bossColor = bossIndex switch
+            {
+                0 => XnaColor.Red,
+                1 => XnaColor.Blue,
+                2 => XnaColor.Green,
+                _ => XnaColor.Purple
+            };
+
+            for (int p = 0; p < bossPixels.Length; p++)
+            {
+                int x = p % bossSize;
+                int y = p / bossSize;
+
+                // Create a distinctive boss pattern with borders
+                if (x < 4 || x > bossSize - 5 || y < 4 || y > bossSize - 5)
+                    bossPixels[p] = XnaColor.Black;
+                else if (x < 8 || x > bossSize - 9 || y < 8 || y > bossSize - 9)
+                    bossPixels[p] = XnaColor.Lerp(bossColor, XnaColor.Black, 0.5f);
+                else
+                    bossPixels[p] = bossColor;
+            }
+            texture.SetData(bossPixels);
+            return texture;
+        }
+    }
+}

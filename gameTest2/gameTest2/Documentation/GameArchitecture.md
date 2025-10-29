@@ -132,7 +132,7 @@ Game Loop Starts
         │  Game Over   │                           │
         │              │                           │
         └──────┬───────┘                           │
-               │ [Click Anywhere]                  │
+               │ [Click "Menu principal"]          │
                └───────────────────────────────────┘
 
         Main Menu ──[Press L]──► Leaderboard ──[Any Key]──► Main Menu

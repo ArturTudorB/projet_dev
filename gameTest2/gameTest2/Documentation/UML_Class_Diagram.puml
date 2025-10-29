@@ -1,0 +1,85 @@
+@startuml Game Architecture - Simple Class Diagram
+
+' Main Game Entry
+package "Main" {
+    class Game1
+}
+
+' Core Systems
+package "Systems" {
+    class InputManager
+    class AudioManager
+    class CollisionDetector
+    class EntitySpawner
+    class EntityUpdater
+    class ContentLoader
+    class BackgroundAnimator
+    class ScoreDatabase
+}
+
+' State Management
+package "States" {
+    interface IGameState
+    abstract BaseGameState
+    class GameStateManager
+    class MainMenuState
+    class UsernameInputState
+    class PlayingState
+    class GameOverState
+    class LeaderboardState
+}
+
+' Rendering
+package "Rendering" {
+    class GameplayRenderer
+    class MenuRenderer
+}
+
+' Game Entities
+package "Models" {
+    class Player
+    class Enemy
+    class Boss
+    class Asteroid
+    class Laser
+    class BuffPickup
+    class ScoreEntry
+}
+
+' Configuration
+package "Config" {
+    class GameConstants
+}
+
+' Relationships
+Game1 --> GameStateManager
+Game1 --> InputManager
+Game1 --> AudioManager
+Game1 --> EntitySpawner
+Game1 --> EntityUpdater
+Game1 --> CollisionDetector
+Game1 --> ContentLoader
+Game1 --> BackgroundAnimator
+Game1 --> ScoreDatabase
+Game1 --> GameplayRenderer
+Game1 --> MenuRenderer
+
+GameStateManager --> IGameState
+
+IGameState <|.. BaseGameState
+BaseGameState <|-- MainMenuState
+BaseGameState <|-- UsernameInputState
+BaseGameState <|-- PlayingState
+BaseGameState <|-- GameOverState
+BaseGameState <|-- LeaderboardState
+
+PlayingState --> Player
+PlayingState --> Enemy
+PlayingState --> Boss
+PlayingState --> Asteroid
+PlayingState --> Laser
+PlayingState --> BuffPickup
+
+ScoreDatabase --> ScoreEntry
+
+@enduml

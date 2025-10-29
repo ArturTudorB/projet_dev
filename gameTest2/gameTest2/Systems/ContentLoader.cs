@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Audio;
 using XnaColor = Microsoft.Xna.Framework.Color;
 using gameTest2.Config;
 
@@ -41,13 +42,14 @@ namespace gameTest2.Systems
         }
 
         /// <summary>
-        /// Loads audio assets (songs) for the game.
+        /// Loads audio assets (songs and sound effects) for the game.
         /// </summary>
-        /// <returns>Tuple of (buttonClickSong, mainMenuMusic). Returns nulls if loading fails.</returns>
-        public (Song buttonClickSong, Song mainMenuMusic) LoadAudioAssets()
+        /// <returns>Tuple of (buttonClickSong, mainMenuMusic, laserSound). Returns nulls if loading fails.</returns>
+        public (Song buttonClickSong, Song mainMenuMusic, SoundEffect laserSound) LoadAudioAssets()
         {
             Song buttonClickSong = null;
             Song mainMenuMusic = null;
+            SoundEffect laserSound = null;
 
             try
             {
@@ -67,7 +69,16 @@ namespace gameTest2.Systems
                 System.Diagnostics.Debug.WriteLine("Failed to load main menu music");
             }
 
-            return (buttonClickSong, mainMenuMusic);
+            try
+            {
+                laserSound = _content.Load<SoundEffect>("game_music/son_laser");
+            }
+            catch
+            {
+                System.Diagnostics.Debug.WriteLine("Failed to load laser sound effect");
+            }
+
+            return (buttonClickSong, mainMenuMusic, laserSound);
         }
 
         /// <summary>

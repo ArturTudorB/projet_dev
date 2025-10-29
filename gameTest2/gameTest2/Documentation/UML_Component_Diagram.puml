@@ -1,0 +1,69 @@
+@startuml Game Component Diagram - Simple
+
+package "Game Entry" {
+    [Game1]
+}
+
+package "Presentation Layer" {
+    [GameplayRenderer]
+    [MenuRenderer]
+}
+
+package "Game Logic" {
+    [GameStateManager]
+    [MainMenuState]
+    [UsernameInputState]
+    [PlayingState]
+    [GameOverState]
+    [LeaderboardState]
+}
+
+package "Systems" {
+    [InputManager]
+    [AudioManager]
+    [CollisionDetector]
+    [EntitySpawner]
+    [EntityUpdater]
+    [ContentLoader]
+    [BackgroundAnimator]
+}
+
+package "Data" {
+    [ScoreDatabase]
+}
+
+package "Entities" {
+    [Player]
+    [Enemy]
+    [Boss]
+    [Asteroid]
+    [Laser]
+    [BuffPickup]
+}
+
+[Game1] --> [GameStateManager]
+[Game1] --> [InputManager]
+[Game1] --> [AudioManager]
+[Game1] --> [EntitySpawner]
+[Game1] --> [EntityUpdater]
+[Game1] --> [CollisionDetector]
+[Game1] --> [ContentLoader]
+[Game1] --> [BackgroundAnimator]
+[Game1] --> [ScoreDatabase]
+[Game1] --> [GameplayRenderer]
+[Game1] --> [MenuRenderer]
+
+[GameStateManager] --> [MainMenuState]
+[GameStateManager] --> [UsernameInputState]
+[GameStateManager] --> [PlayingState]
+[GameStateManager] --> [GameOverState]
+[GameStateManager] --> [LeaderboardState]
+
+[PlayingState] --> [Player]
+[PlayingState] --> [Enemy]
+[PlayingState] --> [Boss]
+[PlayingState] --> [Asteroid]
+[PlayingState] --> [Laser]
+[PlayingState] --> [BuffPickup]
+
+@enduml

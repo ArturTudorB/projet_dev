@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Audio;
 using System;
 
 namespace gameTest2.Systems
@@ -11,6 +12,7 @@ namespace gameTest2.Systems
     {
         private Song _buttonClickSong;
         private Song _mainMenuMusic;
+        private SoundEffect _laserSound;
         private bool _audioEnabled;
         private bool _mainMenuMusicPlaying;
 
@@ -30,18 +32,24 @@ namespace gameTest2.Systems
         /// </summary>
         /// <param name="buttonClickSong">Song to play for button clicks</param>
         /// <param name="mainMenuMusic">Song to loop in the main menu</param>
-        public void Initialize(Song buttonClickSong, Song mainMenuMusic)
+        /// <param name="laserSound">Sound effect for laser shots</param>
+        public void Initialize(Song buttonClickSong, Song mainMenuMusic, SoundEffect laserSound = null)
         {
             _buttonClickSong = buttonClickSong;
             _mainMenuMusic = mainMenuMusic;
+            _laserSound = laserSound;
             
-            // Enable audio if both assets loaded successfully
+            // Enable audio if at least music assets loaded successfully
             _audioEnabled = _buttonClickSong != null && _mainMenuMusic != null;
             _mainMenuMusicPlaying = false;
 
             if (!_audioEnabled)
             {
                 System.Diagnostics.Debug.WriteLine("Audio manager initialized but audio is disabled (assets not loaded)");
+            }
+            else if (_laserSound == null)
+            {
+                System.Diagnostics.Debug.WriteLine("Audio manager initialized but laser sound effect not loaded");
             }
         }
 
@@ -117,6 +125,25 @@ namespace gameTest2.Systems
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Failed to play button click sound: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Plays the laser shot sound effect.
+        /// Non-blocking and can play multiple instances simultaneously.
+        /// </summary>
+        public void PlayLaserSound()
+        {
+            if (!_audioEnabled || _laserSound == null)
+                return;
+
+            try
+            {
+                _laserSound.Play(volume: 0.3f, pitch: 0.0f, pan: 0.0f);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to play laser sound: {ex.Message}");
             }
         }
 

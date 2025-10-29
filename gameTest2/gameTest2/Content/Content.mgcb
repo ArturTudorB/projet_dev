@@ -695,6 +695,12 @@
 /processorParam:Quality=Best
 /build:game_music/main_menu_music.mp3
 
+#begin game_music/son_laser.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:game_music/son_laser.mp3
+
 #begin textures/buff/vitesse.png
 /importer:TextureImporter
 /processor:TextureProcessor

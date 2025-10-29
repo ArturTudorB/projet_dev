@@ -1,0 +1,41 @@
+@startuml Game Sequence Diagram - Game Start Flow
+
+actor Player
+participant MainMenu
+participant UsernameInput
+participant Playing
+participant GameOver
+participant Database
+
+Player -> MainMenu : Start Game
+activate MainMenu
+
+MainMenu -> UsernameInput : Navigate
+deactivate MainMenu
+activate UsernameInput
+
+Player -> UsernameInput : Enter Name
+
+UsernameInput -> Playing : Start Gameplay
+deactivate UsernameInput
+activate Playing
+
+Player -> Playing : Play Game
+
+Playing -> Playing : Update Entities
+Playing -> Playing : Handle Collisions
+Playing -> Playing : Check Game Over
+
+Playing -> GameOver : Player Dies
+deactivate Playing
+activate GameOver
+
+GameOver -> Database : Save Score
+activate Database
+Database --> GameOver : Score Saved
+deactivate Database
+
+GameOver -> MainMenu : Return to Menu
+deactivate GameOver
+
+@enduml

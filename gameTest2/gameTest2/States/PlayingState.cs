@@ -209,6 +209,9 @@ namespace gameTest2.States
         {
             Vector2 targetPos = Input.GetMousePosition();
             
+            // Play laser sound effect
+            Audio.PlayLaserSound();
+            
             // Tir multiple si le buff est actif
             if (_player.HasMultiShotBuff)
             {

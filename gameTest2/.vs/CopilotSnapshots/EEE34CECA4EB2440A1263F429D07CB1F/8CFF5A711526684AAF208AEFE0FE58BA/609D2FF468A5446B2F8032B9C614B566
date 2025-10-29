@@ -1,0 +1,409 @@
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
+using gameTest2.Systems;
+using gameTest2.Rendering;
+using gameTest2.Models;
+using gameTest2.Config;
+
+namespace gameTest2.States
+{
+    public class PlayingState : BaseGameState
+    {
+        private readonly GameplayRenderer _gameplayRenderer;
+        private readonly GameStateManager _stateManager;
+        private readonly EntitySpawner _entitySpawner;
+        private readonly EntityUpdater _entityUpdater;
+        private readonly ScoreDatabase _scoreDatabase;
+        
+        // Game data
+        private readonly Player _player;
+        private readonly string _playerName;
+        private readonly List<Laser> _lasers;
+        private readonly List<Enemy> _enemies;
+        private readonly List<Asteroid> _asteroids;
+        private readonly List<BuffPickup> _buffPickups;
+        
+        // Textures
+        private readonly Texture2D _laserTexture;
+        private readonly Texture2D[] _enemyTextures;
+        private readonly Texture2D[] _asteroidTextures;
+        private readonly Texture2D[] _buffTextures;
+        private readonly Texture2D[] _bossTextures;
+        
+        // Game state
+        private float _totalPlayTime;
+        private double _score;
+        private int _scoreInt;
+        private int _enemiesDestroyed;
+        private int _bossesDefeated;
+        
+        // Spawn timers
+        private float _enemySpawnTimer;
+        private float _asteroidSpawnTimer;
+        private bool _spawnedEnemyThisUpdate;
+        
+        // Boss state
+        private bool _bossActive;
+        private int _currentBossTextureIndex;
+        private Vector2 _bossPosition;
+        private float _bossHp;
+        private float _bossHorizontalSpeed;
+        private float _bossHorizontalDir;
+        private float _bossMovementTimer;
+        private float _bossShootTimer;
+        private int _bossShotsFired;
+        private float _bossBurstTimer;
+        private bool _bossIsBursting;
+        
+        private readonly float _laserSpeedMultiplier;
+        private readonly int _screenWidth;
+        private readonly int _screenHeight;
+
+        public PlayingState(
+            Game1 game,
+            InputManager input,
+            AudioManager audio,
+            GameplayRenderer gameplayRenderer,
+            GameStateManager stateManager,
+            EntitySpawner entitySpawner,
+            EntityUpdater entityUpdater,
+            ScoreDatabase scoreDatabase,
+            Player player,
+            string playerName,
+            List<Laser> lasers,
+            List<Enemy> enemies,
+            List<Asteroid> asteroids,
+            List<BuffPickup> buffPickups,
+            Texture2D laserTexture,
+            Texture2D[] enemyTextures,
+            Texture2D[] asteroidTextures,
+            Texture2D[] buffTextures,
+            Texture2D[] bossTextures,
+            float laserSpeedMultiplier,
+            int screenWidth,
+            int screenHeight)
+            : base(game, input, audio)
+        {
+            _gameplayRenderer = gameplayRenderer;
+            _stateManager = stateManager;
+            _entitySpawner = entitySpawner;
+            _entityUpdater = entityUpdater;
+            _scoreDatabase = scoreDatabase;
+            
+            _player = player;
+            _playerName = playerName;
+            _lasers = lasers;
+            _enemies = enemies;
+            _asteroids = asteroids;
+            _buffPickups = buffPickups;
+            
+            _laserTexture = laserTexture;
+            _enemyTextures = enemyTextures;
+            _asteroidTextures = asteroidTextures;
+            _buffTextures = buffTextures;
+            _bossTextures = bossTextures;
+            
+            _laserSpeedMultiplier = laserSpeedMultiplier;
+            _screenWidth = screenWidth;
+            _screenHeight = screenHeight;
+            
+            // Initialize game state
+            ResetGameState();
+        }
+
+        private void ResetGameState()
+        {
+            _lasers.Clear();
+            _enemies.Clear();
+            _asteroids.Clear();
+            _buffPickups.Clear();
+            
+            _player.Reset(new Vector2(_screenWidth / 2f, _screenHeight / 2f));
+            
+            _totalPlayTime = 0f;
+            _score = 0.0;
+            _scoreInt = 0;
+            _enemiesDestroyed = 0;
+            _bossesDefeated = 0;
+            
+            _enemySpawnTimer = 0f;
+            _asteroidSpawnTimer = 0f;
+            _spawnedEnemyThisUpdate = false;
+            
+            _bossActive = false;
+            _currentBossTextureIndex = 0;
+            _bossHp = GameConstants.BossMaxHp;
+            _bossHorizontalSpeed = GameConstants.BossHorizontalSpeed;
+            _bossHorizontalDir = 1f;
+            _bossMovementTimer = 0f;
+            _bossShootTimer = 0f;
+            _bossShotsFired = 0;
+            _bossBurstTimer = 0f;
+            _bossIsBursting = false;
+        }
+
+        public override void Enter()
+        {
+            Audio.EnsureMainMenuMusicStopped();
+        }
+
+        public override void Update(float deltaTime)
+        {
+            // Vérification de la mort du joueur
+            if (_player.IsDead)
+            {
+                _scoreDatabase.SaveScore(_playerName, _scoreInt);
+                _stateManager.ChangeState(Game.CreateGameOverState(_stateManager, _scoreInt, _playerName));
+                return;
+            }
+
+            // Retour au menu principal avec Escape
+            if (Input.IsBackJustPressed() || Input.IsGamePadBackPressed())
+            {
+                _stateManager.ChangeState(Game.CreateMainMenuState(_stateManager));
+                return;
+            }
+
+            _spawnedEnemyThisUpdate = false;
+            
+            // Mise à jour du joueur
+            _player.Update(deltaTime);
+            
+            // Calcul du score basé sur le temps de jeu
+            _totalPlayTime += deltaTime;
+            double scoreGain = GameConstants.ScorePerSecond * deltaTime;
+            _score += scoreGain;
+            _scoreInt = (int)System.Math.Round(_score);
+            
+            // Gestion des déplacements du joueur
+            Vector2 movementDirection = Input.GetMovementDirection();
+            if (movementDirection.LengthSquared() > 0)
+            {
+                _player.Move(movementDirection, deltaTime);
+            }
+            _player.ClampToScreen(_screenWidth, _screenHeight);
+            
+            // Gestion des tirs du joueur
+            if (Input.IsLeftMouseButtonJustClicked() && _player.CanShoot())
+            {
+                HandlePlayerShooting();
+                _player.ResetShootCooldown();
+            }
+            
+            // Mise à jour du boss (spawn et logique)
+            UpdateBossLogic(deltaTime);
+            
+            // Spawn des ennemis et astéroïdes (seulement si pas de boss actif)
+            if (!_bossActive)
+            {
+                UpdateEnemySpawning(deltaTime);
+                UpdateAsteroidSpawning(deltaTime);
+            }
+            
+            // Mise à jour de toutes les entités du jeu
+            UpdateEntities(deltaTime);
+        }
+
+        private void HandlePlayerShooting()
+        {
+            Vector2 targetPos = Input.GetMousePosition();
+            
+            // Play laser sound effect
+            Audio.PlayLaserSound();
+            
+            // Tir multiple si le buff est actif
+            if (_player.HasMultiShotBuff)
+            {
+                // Tire 3 lasers avec un angle de dispersion
+                Vector2 dir = targetPos - _player.Position;
+                if (dir.LengthSquared() > 0)
+                    dir.Normalize();
+                else
+                    dir = _player.Facing;
+                
+                float baseAngle = System.MathF.Atan2(dir.Y, dir.X);
+                float spreadAngle = MathHelper.ToRadians(GameConstants.MultiShotSpreadAngle);
+                
+                for (int i = -1; i <= 1; i++)
+                {
+                    float angle = baseAngle + (i * spreadAngle);
+                    Vector2 shotDir = new Vector2(System.MathF.Cos(angle), System.MathF.Sin(angle));
+                    SpawnLaserInDirection(shotDir, false);
+                }
+            }
+            else
+            {
+                // Tir simple vers la souris
+                SpawnLaserTowards(targetPos, false);
+            }
+        }
+
+        private void UpdateBossLogic(float deltaTime)
+        {
+            // Vérification si un boss doit apparaître
+            if (!_bossActive)
+            {
+                if (_entitySpawner.ShouldSpawnBoss(_enemiesDestroyed, _bossesDefeated))
+                {
+                    _bossActive = true;
+                    _currentBossTextureIndex = _entitySpawner.GetBossTextureIndex(_bossesDefeated);
+                    
+                    var (position, horizontalDir) = _entitySpawner.SpawnBoss(_currentBossTextureIndex);
+                    _bossPosition = position;
+                    _bossHorizontalDir = horizontalDir;
+                    _bossHp = GameConstants.BossMaxHp;
+                    _bossMovementTimer = 0f;
+                }
+            }
+            
+            // Mise à jour du boss s'il est actif
+            if (_bossActive)
+            {
+                int shieldCharges = _player.ShieldCharges;
+                
+                // Mise à jour des déplacements et collisions du boss
+                _entityUpdater.UpdateBoss(
+                    ref _bossPosition,
+                    ref _bossMovementTimer,
+                    ref _bossHorizontalDir,
+                    _bossHorizontalSpeed,
+                    _bossTextures[_currentBossTextureIndex],
+                    deltaTime,
+                    _player.Position,
+                    _player.Texture,
+                    _bossActive,
+                    (damage) => _player.TakeDamage(damage),
+                    () => { },
+                    ref shieldCharges);
+                
+                // Gestion des tirs du boss (rafales)
+                _entityUpdater.UpdateBossShooting(
+                    ref _bossShootTimer,
+                    ref _bossShotsFired,
+                    ref _bossBurstTimer,
+                    ref _bossIsBursting,
+                    deltaTime,
+                    FireBossShot);
+            }
+        }
+
+        private void UpdateEnemySpawning(float deltaTime)
+        {
+            // Spawn des ennemis avec intervalle basé sur la difficulté
+            float enemyInterval = _entitySpawner.CalculateEnemySpawnInterval(_scoreInt);
+            _enemySpawnTimer += deltaTime;
+            if (_enemySpawnTimer >= enemyInterval && !_spawnedEnemyThisUpdate)
+            {
+                _enemySpawnTimer -= enemyInterval;
+                _enemies.Add(_entitySpawner.SpawnEnemy(_enemyTextures, _scoreInt, _totalPlayTime));
+                _spawnedEnemyThisUpdate = true;
+            }
+        }
+
+        private void UpdateAsteroidSpawning(float deltaTime)
+        {
+            // Spawn des astéroïdes avec intervalle basé sur la difficulté
+            float asteroidInterval = _entitySpawner.CalculateAsteroidSpawnInterval(_scoreInt);
+            _asteroidSpawnTimer += deltaTime;
+            if (_asteroidSpawnTimer >= asteroidInterval)
+            {
+                _asteroidSpawnTimer -= asteroidInterval;
+                _asteroids.Add(_entitySpawner.SpawnAsteroid(_asteroidTextures));
+            }
+        }
+
+        private void UpdateEntities(float deltaTime)
+        {
+            int shieldCharges = _player.ShieldCharges;
+            
+            // Mise à jour des ennemis (déplacements, IA, tirs, collisions)
+            _entityUpdater.UpdateEnemies(
+                _enemies, _enemyTextures, deltaTime, _scoreInt, _totalPlayTime,
+                _player.Position, _player.Texture,
+                (enemyPos) => SpawnLaserTowards(_player.Position, true, enemyPos),
+                (damage) => _player.TakeDamage(damage),
+                () => { },
+                ref shieldCharges);
+            
+            // Mise à jour des astéroïdes (déplacements et collisions)
+            _entityUpdater.UpdateAsteroids(
+                _asteroids, deltaTime, _player.Position, _player.Texture,
+                (damage) => _player.TakeDamage(damage),
+                () => { },
+                ref shieldCharges);
+            
+            // Mise à jour des lasers (déplacements et collisions)
+            _entityUpdater.UpdateLasers(
+                _lasers, _laserTexture, deltaTime, _bossActive, _bossPosition,
+                _bossTextures[_currentBossTextureIndex],
+                ref _bossHp, ref _bossActive, ref _bossesDefeated, ref _enemiesDestroyed,
+                SpawnBuffDrop, _enemies, _enemyTextures, _asteroids,
+                _player.Position, _player.Texture,
+                (damage) => _player.TakeDamage(damage),
+                () => { },
+                ref shieldCharges,
+                IsOffScreen,
+                (scoreGain) => {
+                    _score += scoreGain;
+                    _scoreInt = (int)System.Math.Round(_score);
+                });
+            
+            // Applique les charges de bouclier au joueur après toutes les mises à jour
+            _player.SetShieldCharges(shieldCharges);
+            
+            // Mise à jour des buffs (déplacements et collecte)
+            _entityUpdater.UpdateBuffPickups(
+                _buffPickups, deltaTime, _player.Position, _player.ApplyBuff);
+        }
+
+        private void SpawnBuffDrop(Vector2 position)
+        {
+            var buff = _entitySpawner.TrySpawnBuffDrop(position);
+            if (buff.HasValue)
+                _buffPickups.Add(buff.Value);
+        }
+
+        private void SpawnLaserInDirection(Vector2 direction, bool isEnemy, Vector2? origin = null)
+        {
+            Vector2 src = origin ?? _player.Position;
+            var laser = _entitySpawner.SpawnLaserInDirection(
+                src, direction, _player.Facing, isEnemy, _player.Speed, _laserSpeedMultiplier, _player.Texture.Height);
+            _lasers.Add(laser);
+        }
+
+        private void SpawnLaserTowards(Vector2 target, bool isEnemy, Vector2? origin = null)
+        {
+            Vector2 src = origin ?? _player.Position;
+            var laser = _entitySpawner.SpawnLaserTowards(
+                src, target, _player.Facing, isEnemy, _player.Speed, _laserSpeedMultiplier, _player.Texture.Height);
+            _lasers.Add(laser);
+        }
+
+        private void FireBossShot()
+        {
+            var laser = _entitySpawner.SpawnBossLaser(
+                _bossPosition, _player.Position, _player.Speed, _laserSpeedMultiplier,
+                _bossTextures[_currentBossTextureIndex].Height);
+            _lasers.Add(laser);
+        }
+
+        private bool IsOffScreen(Vector2 pos)
+        {
+            int margin = GameConstants.LaserOffScreenMargin;
+            return pos.X < -margin || pos.X > _screenWidth + margin || 
+                   pos.Y < -margin || pos.Y > _screenHeight + margin;
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            _gameplayRenderer.DrawPlaying(
+                _asteroids, _enemyTextures, _enemies, _buffTextures, _buffPickups,
+                _laserTexture, _lasers, _player.Texture, _player.Position,
+                _player.ShieldCharges, _totalPlayTime, _bossTextures, _bossActive,
+                _currentBossTextureIndex, _bossPosition, _screenWidth, _scoreInt,
+                _player.Health, _playerName, _bossHp,
+                _player.SpeedBuffTimer, _player.FireRateBuffTimer, _player.MultiShotBuffTimer);
+        }
+    }
+}

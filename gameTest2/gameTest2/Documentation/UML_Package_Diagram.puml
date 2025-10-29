@@ -1,0 +1,57 @@
+@startuml Game Package Diagram - Simple
+
+package gameTest2 {
+    
+    package States {
+        class IGameState
+        class BaseGameState
+        class GameStateManager
+        class MainMenuState
+        class UsernameInputState
+        class PlayingState
+        class GameOverState
+        class LeaderboardState
+    }
+    
+    package Systems {
+        class InputManager
+        class AudioManager
+        class CollisionDetector
+        class EntitySpawner
+        class EntityUpdater
+        class ContentLoader
+        class BackgroundAnimator
+        class ScoreDatabase
+    }
+    
+    package Rendering {
+        class GameplayRenderer
+        class MenuRenderer
+    }
+    
+    package Models {
+        class Player
+        class Enemy
+        class Boss
+        class Asteroid
+        class Laser
+        class BuffPickup
+        class ScoreEntry
+    }
+    
+    package Config {
+        class GameConstants
+    }
+    
+    class Game1
+}
+
+Game1 ..> States
+Game1 ..> Systems
+Game1 ..> Rendering
+States ..> Models
+Systems ..> Models
+Rendering ..> Models
+Systems ..> Config
+
+@enduml
